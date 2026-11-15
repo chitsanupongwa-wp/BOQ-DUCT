@@ -1393,7 +1393,7 @@ function diagramSVG(){
         <text class="cap" x="${cx}" y="${yj-14}" text-anchor="middle">${dlab('ang')}</text>`; break; }
     case 'แดมเปอร์': {
       const W=dv('W'), H=dv('H'), L=dv('L'), nb=Math.max(1,Math.ceil(H/150)); const k=Math.min(170/W,140/H, 150/(L+60)), x0=40, y0=58, ww=W*k, hh=H*k, f=Math.max(6,25*k), sx=x0+ww+70, ll=L*k; VH=230;
-      const bl=Array.from({length:nb},(_,i)=>{ const yc=y0+hh*(i+0.5)/nb, dy=hh/nb*0.3; return `<path d="M${x0+6} ${yc+dy}L${x0+ww-6} ${yc-dy}" stroke="#39403d" stroke-width="2.2" fill="none"/>`; }).join('');
+      const bl=Array.from({length:nb},(_,i)=>{ const yc=y0+hh*(i+0.5)/nb, bh=Math.max(4,Math.min(hh/nb*0.42,14)); return `<rect x="${x0+5}" y="${yc-bh/2}" width="${ww-10}" height="${bh}" fill="#dee2e6" stroke="#39403d" stroke-width="1.6"/><path d="M${x0+2} ${yc}H${x0+ww-2}" stroke="#39403d" stroke-width="0.8" stroke-dasharray="8 3 2 3"/>`; }).join('');
       const bs=Array.from({length:nb},(_,i)=>{ const yc=y0+hh*(i+0.5)/nb, dy=hh/nb*0.42; return `<path d="M${sx+ll/2-dy*0.7} ${yc+dy}L${sx+ll/2+dy*0.7} ${yc-dy}" stroke="#39403d" stroke-width="2.2"/><circle cx="${sx+ll/2}" cy="${yc}" r="1.8" fill="#39403d"/>`; }).join('');
       b = `<text class="cap" x="${x0+ww/2}" y="${y0-f-26}" text-anchor="middle">ด้านหน้า</text>
         <rect class="fl" x="${x0-f}" y="${y0-f}" width="${ww+2*f}" height="${hh+2*f}"/><rect x="${x0}" y="${y0}" width="${ww}" height="${hh}" fill="#fff" stroke="#39403d" stroke-width="1.4"/>${bl}
