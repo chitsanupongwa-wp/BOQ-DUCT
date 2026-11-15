@@ -3,19 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PID Duct Calc — คำนวณแผ่น PID</title>
+<title>Duct BOQ — ถอดปริมาณท่อลม</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f4f5f7; --panel:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --soft:#f3f4f6;
-  --input:#1d4ed8; --accent:#16a34a; --accent-soft:#e9f7ef; --accent-ink:#15803d; --warn:#b4541a; --danger:#b42318;
+  --input:#1d4ed8; --accent:#15703c; --accent-soft:#e5f1e9; --accent-ink:#0f5a2f; --warn:#b4541a; --danger:#b42318;
   --t-straight:#1f6feb; --t-elbow:#b4541a; --t-reducer:#7a4fd1; --t-tee:#0f6b5c; --t-offset:#a1306b; --t-trap:#8a6a00; --t-cross:#0b7285; --t-sqr:#364fc7;
   --radius:14px; --mono:'Prompt',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+body.pop .side,body.pop .ph,body.pop #phead,body.pop .credit,body.pop .dock,body.pop .dw-pophide{display:none!important}
+body.pop main{padding:10px 12px 12px!important;max-width:none!important} body.pop .dw-vp{height:calc(100vh - 150px)}
+body.pop .dw-lists{grid-template-columns:1fr 1fr}
+#v-drawing.max .dw-card:first-child{position:fixed;inset:0;z-index:45;margin:0;border-radius:0;display:flex;flex-direction:column}
+#v-drawing.max .dw-vp{flex:1;height:auto}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Prompt',system-ui,sans-serif;font-size:15px;line-height:1.45}
 button,input,select{font:inherit;color:inherit}
 header.top{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff}
@@ -123,16 +128,16 @@ h2{font-size:18px;margin:22px 0 10px}
 .big .box{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
 .big .box:focus-within{border-color:var(--input);box-shadow:0 0 0 3px #dbe5fb}
 .big.err .box{border-color:var(--danger);box-shadow:0 0 0 3px #fbe1df}
-.big input{border:0;outline:0;padding:9px 10px;font-size:20px;font-weight:600;color:var(--input);width:100%;min-width:0;background:transparent;font-variant-numeric:tabular-nums}
+.big input{border:0;outline:0;padding:6px 10px;font-size:16px;font-weight:600;color:var(--input);width:100%;min-width:0;background:transparent;font-variant-numeric:tabular-nums}
 .big .u{padding:0 10px;color:var(--muted);font-size:14px;white-space:nowrap}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.seg2{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;height:47px}
-.seg2 button{flex:1;border:0;background:transparent;font-size:clamp(14px,3.6vw,17px);font-weight:600;cursor:pointer;color:var(--muted)}
+.seg2{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;height:36px}
+.seg2 button{flex:1;border:0;background:transparent;font-size:14.5px;font-weight:600;cursor:pointer;color:var(--muted)}
 .seg2 button.on{background:var(--ink);color:#fff}
-.stepper{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;height:47px}
-.stepper button{width:44px;border:0;background:var(--soft);font-size:22px;cursor:pointer}
-.stepper input{flex:1;border:0;outline:0;text-align:center;font-size:20px;font-weight:600;color:var(--input);min-width:0;width:100%}
-.descin{width:100%;margin-top:12px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;color:var(--input)}
+.stepper{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;height:36px}
+.stepper button{width:36px;border:0;background:var(--soft);font-size:18px;cursor:pointer}
+.stepper input{flex:1;border:0;outline:0;text-align:center;font-size:16px;font-weight:600;color:var(--input);min-width:0;width:100%}
+.descin{width:100%;margin-top:10px;border:1.5px solid var(--line);border-radius:10px;padding:7px 10px;font-size:14.5px;color:var(--input)}
 .descin:focus{outline:0;border-color:var(--input);box-shadow:0 0 0 3px #dbe5fb}
 details.more{margin-top:10px;font-size:14px}
 details.more summary{cursor:pointer;color:var(--muted)}
@@ -144,7 +149,7 @@ details.more .fgrid{margin-top:8px}
 .preview .pv.hl b{color:var(--accent)}
 .preview .wait{grid-column:1/-1;color:var(--muted);font-size:14px;align-self:center}
 .factions{display:flex;gap:8px;margin-top:14px}
-.factions .btn{height:48px;font-size:17px}
+.factions .btn{height:38px;font-size:15px}
 .factions .primary{flex:1}
 .btn.danger{color:var(--danger)}
 /* compact list */
@@ -220,9 +225,9 @@ details.more .fgrid{margin-top:8px}
 .seg{flex-wrap:wrap}
 /* forced device modes */
 body.dv-tab{font-size:17px}
-body.dv-tab .big input{font-size:23px;padding:12px}
+body.dv-tab .big input{font-size:18px;padding:8px 10px}
 body.dv-tab .tcard{padding:12px 2px 8px;font-size:14px}.dv-tab .tcard svg{width:46px;height:34px}
-body.dv-tab .btn{padding:10px 16px}.dv-tab .stepper,.dv-tab .seg2{height:54px}
+body.dv-tab .btn{padding:10px 16px}.dv-tab .stepper,.dv-tab .seg2{height:42px}
 body.dv-tab .layout{grid-template-columns:1fr}.dv-tab .form-card{position:static}
 body.dv-mob .shell{max-width:440px;margin:0 auto;flex-direction:column;box-shadow:0 0 0 1px var(--line)}
 body.dv-mob .side{width:auto;height:auto;position:sticky;top:0;z-index:30;flex-direction:row;align-items:center;padding:8px 10px;border-right:0;border-bottom:1px solid var(--line);gap:8px;overflow-x:auto}
@@ -297,7 +302,7 @@ body.dv-mob .inputs,body.dv-mob .pgrid{grid-template-columns:1fr}
 .snav a{display:flex;align-items:center;gap:10px;padding:11px 18px;margin:0 10px;border-radius:10px;color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:500}
 .snav a svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;flex:none}
 .snav a:hover{background:var(--soft)}
-.snav a.on{background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(22,163,74,.28)}
+.snav a.on{background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(21,112,60,.28)}
 .snav .badge{margin-left:auto;background:var(--accent-soft);color:var(--accent-ink);font-size:11.5px;font-weight:600;border-radius:999px;padding:1px 8px}
 .snav .badge:empty{display:none}
 .snav a.on .badge{background:rgba(255,255,255,.25);color:#fff}
@@ -314,7 +319,7 @@ main{max-width:none;margin:0;padding:20px 28px 110px}
 .dock-in{max-width:none;padding-left:28px;padding-right:28px}
 .form-card{top:16px}
 /* accent styling */
-.btn.primary{background:var(--accent);border-color:var(--accent);box-shadow:0 4px 12px rgba(22,163,74,.25)}
+.btn.primary{background:var(--accent);border-color:var(--accent);box-shadow:0 4px 12px rgba(21,112,60,.25)}
 .btn{border-radius:10px}
 .seg button.on,.seg2 button.on,.tabs.sub a.on{background:var(--accent);color:#fff}
 .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -431,7 +436,7 @@ main{max-width:none;margin:0;padding:20px 28px 110px}
  #printArea .po-dr .diag svg .dm line{stroke-width:.8!important} #printArea .po-dr .diag svg .spv{fill:#000!important}
 }
 @media print{ @page{size:A4;margin:14mm 12mm 16mm 12mm;
-   @bottom-left{content:"PID Duct Calc · เว็บเขียนโดย Chitsanupong W.";font-family:'THSarabunL','Sarabun',sans-serif;font-size:8pt;color:#555}
+   @bottom-left{content:"Duct BOQ · เว็บเขียนโดย Chitsanupong W.";font-family:'THSarabunL','Sarabun',sans-serif;font-size:8pt;color:#555}
    @bottom-right{content:"หน้า " counter(page) " / " counter(pages);font-family:'THSarabunL','Sarabun',sans-serif;font-size:8pt;color:#555}}
  body.printing>*:not(#printArea){display:none!important} body.printing #printArea{display:block} body.printing{background:#fff}
  #printArea{font-family:'Sarabun','Prompt',sans-serif;color:#1f2933;font-size:10.5pt;line-height:1.35}
@@ -441,12 +446,12 @@ main{max-width:none;margin:0;padding:20px 28px 110px}
  .rp-doc{display:grid;grid-template-columns:auto 1fr;font-size:9pt} .rp-doc span{padding:3px 7px;border-bottom:1px solid #9aa5b1;color:#52606d} .rp-doc b{padding:3px 7px;border-bottom:1px solid #9aa5b1;font-weight:600;text-align:right;white-space:nowrap}
  .rp-doc span:nth-last-child(2),.rp-doc b:last-child{border-bottom:0}
  .rp-info{width:100%;border-collapse:collapse;margin-top:-1.2px} .rp-info td{border:1.2px solid #1f2933;padding:4px 8px;font-size:9.5pt;vertical-align:top} .rp-info td.k{width:16%;background:#f1f5f2;color:#3e4c59;font-weight:600}
- .rp-sec{display:flex;align-items:center;gap:8px;margin:16px 0 6px;font-size:12pt;font-weight:700;color:#14532d} .rp-sec i{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#16a34a;color:#fff;font-size:9.5pt}
+ .rp-sec{display:flex;align-items:center;gap:8px;margin:16px 0 6px;font-size:12pt;font-weight:700;color:#14532d} .rp-sec i{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#15703c;color:#fff;font-size:9.5pt}
  .rp-kpi{width:100%;border-collapse:collapse} .rp-kpi td{border:1px solid #9aa5b1;padding:6px 8px;width:20%;vertical-align:top} .rp-kpi span{display:block;font-size:8.5pt;color:#52606d} .rp-kpi b{font-size:14pt;font-weight:700} .rp-kpi small{font-size:9pt;color:#52606d;margin-left:3px} .rp-kpi td.hl{background:#ecfdf3}
  .rp-t{width:100%;border-collapse:collapse;font-size:9.5pt} .rp-t th{background:#14532d;color:#fff;font-weight:600;padding:4px 6px;border:1px solid #14532d;text-align:center;white-space:nowrap}
  .rp-t td{border:1px solid #cbd2d9;padding:3px 6px;vertical-align:top} .rp-t tbody tr:nth-child(even) td{background:#f8faf9} .rp-t td.c{text-align:center} .rp-t td.n{text-align:right;white-space:nowrap}
  .rp-t tr.tot td{font-weight:700;background:#e6f4ea!important;border-top:1.5px solid #14532d} .rp-t tr.sub td{font-weight:600;background:#f1f5f2!important} .rp-t thead{display:table-header-group} .rp-t tr{page-break-inside:avoid}
- .rp-tag{display:inline-block;padding:0 6px;border-radius:9px;font-size:8pt;border:1px solid #9aa5b1;color:#3e4c59} .rp-tag.pid{border-color:#16a34a;color:#15803d} .rp-tag.gi{border-color:#3d4a5c;color:#3d4a5c}
+ .rp-tag{display:inline-block;padding:0 6px;border-radius:9px;font-size:8pt;border:1px solid #9aa5b1;color:#3e4c59} .rp-tag.pid{border-color:#15703c;color:#15803d} .rp-tag.gi{border-color:#3d4a5c;color:#3d4a5c}
  .rp-sign{width:100%;border-collapse:collapse;margin-top:18px;page-break-inside:avoid} .rp-sign td{border:1px solid #9aa5b1;width:33.3%;text-align:center;padding:6px 8px 8px;font-size:9.5pt} .rp-sign td b{display:block;text-align:left;font-weight:600;color:#3e4c59} .rp-sign .ln{margin:34px 18px 4px;border-bottom:1px dotted #52606d}
  #printArea td,#printArea th{text-align:left} #printArea .rp-t th{text-align:center} #printArea td.c{text-align:center} #printArea td.n{text-align:right} #printArea .rp-sign td{text-align:center} #printArea .rp-sign td b{text-align:left}
  .rp-note{color:#7b8794;font-size:8.5pt;margin-top:6px}
@@ -460,6 +465,33 @@ main{max-width:none;margin:0;padding:20px 28px 110px}
 .credit{text-align:center;color:#868e96;font-size:12px;padding:18px 12px 28px}
 .tcard svg.ic3{width:62px;height:34px}
 body.dv-tab .tcard svg.ic3{width:64px;height:36px}
+.btn.line{background:#06c755;border-color:#06c755;color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:600;text-decoration:none} .btn.line:hover{background:#05b04b}
+.btn.line.ghostl{background:#fff;color:#05a548;border-color:#06c755} .lnico{background:#06c755;color:#fff;font-size:11px;font-weight:800;border-radius:6px;padding:2px 6px}
+.lnact{display:flex;flex-direction:column;gap:8px;margin-top:12px} .lnact>.btn{height:40px} .lnrow{display:flex;gap:6px;flex-wrap:wrap}
+.phact{display:flex;gap:6px;flex-wrap:wrap;margin-left:6px}
+.phact .btn{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.btn.ob1{background:#f76707;border-color:#f76707;color:#fff;box-shadow:0 3px 10px rgba(247,103,7,.25)} .btn.ob1:hover{background:#e8590c;border-color:#e8590c}
+.btn.ob2{background:#fff4e6;border-color:#ffc078;color:#d9480f} .btn.ob2:hover{background:#ffe8cc}
+.dw-lists>*,#v-drawing{min-width:0;max-width:100%}
+.dw-card{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.dw-h{display:flex;align-items:center;gap:8px;margin-bottom:10px} .dw-h b{font-size:14px;letter-spacing:.04em;color:#495057}
+.dw-tb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.dw-tb .btn.on{background:#1971c2;border-color:#1971c2;color:#fff}
+.dw-z{min-width:52px;text-align:center;color:var(--muted);font-size:14px} .dw-sep{width:1px;height:24px;background:var(--line);margin:0 4px}
+.dw-l{display:inline-flex;align-items:center;gap:5px;font-size:14px;color:#495057} .dw-l select,.dw-l input{border:1px solid var(--line);border-radius:8px;padding:4px 6px;font:inherit;background:#fff} .dw-l input{width:78px}
+.dw-vp{position:relative;height:68vh;min-height:360px;border:1px solid #dbe4f0;border-radius:10px;overflow:hidden;background:#f8fafc;touch-action:none;user-select:none;cursor:grab}
+.dw-vp.pan{cursor:grabbing} .dw-vp.tool{cursor:crosshair}
+#dwSt{position:absolute;left:0;top:0;transform-origin:0 0;background:#fff;box-shadow:0 0 0 1px #cfd8e3}
+#dwSt.grid{background-color:#fff;background-image:linear-gradient(#eef2f7 1px,transparent 1px),linear-gradient(90deg,#eef2f7 1px,transparent 1px);background-size:50px 50px}
+#dwImg{position:absolute;left:0;top:0;display:block;pointer-events:none} #dwSvg{position:absolute;left:0;top:0;overflow:visible}
+.dw-empty{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:rgba(255,255,255,.92);border:1px dashed #adb5bd;border-radius:10px;padding:6px 14px;font-size:14px;color:#495057;pointer-events:none}
+.dw-busy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.7);font-weight:600}
+.dw-hint{font-size:13px;color:var(--muted);margin-top:6px;min-height:18px}
+.dw-lists{display:grid;grid-template-columns:1fr 1fr;gap:14px} @media(max-width:900px){.dw-lists{grid-template-columns:1fr}}
+.dw-t{width:100%;border-collapse:collapse;font-size:14px} .dw-t th{background:var(--soft);text-align:left;padding:6px 8px;font-weight:600;border-bottom:1px solid var(--line)} .dw-t td{padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.dw-t input,.dw-t select{border:1px solid var(--line);border-radius:7px;padding:3px 6px;font:inherit;width:100%;background:#fff} .dw-t .pno{width:70px} .dw-t .num{text-align:right;white-space:nowrap}
+.dw-t tr.hl td{background:#fff9db}
+.ptag{display:inline-block;background:#1971c2;color:#fff;border-radius:999px;font-size:11px;font-weight:700;padding:0 7px;margin-left:6px;vertical-align:1px}
 #tPrev{position:fixed;z-index:60;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:8px 10px 6px;display:none;text-align:center;font-size:13px;font-weight:600;color:#343a40}
 #tPrev svg{width:240px;height:124px;display:block} #tPrev svg *{vector-effect:non-scaling-stroke;stroke-width:1.1px!important}
 </style>
@@ -467,12 +499,13 @@ body.dv-tab .tcard svg.ic3{width:64px;height:36px}
 <body>
 <div class="shell">
 <aside class="side">
-  <div class="logo">PID Calculation</div>
+  <div class="logo">Duct BOQ</div>
   <nav class="snav">
     <a href="#projects" data-v="projects"><svg viewBox="0 0 20 20"><path d="M3 5.5h5l1.5 2H17v8H3z"/></svg><span>โครงการทั้งหมด</span><b class="badge" id="projCount"></b></a>
     <div class="sgroup" id="sProj">
       <div class="sp-name"><span class="sep" id="crSep"></span><span id="pname"></span></div>
       <a href="#items" data-v="items"><svg viewBox="0 0 20 20"><path d="M4 4h12v12H4zM7 8h6M7 11h6M7 14h4"/></svg><span>รายการท่อลม</span><b class="badge" id="itemCount"></b></a>
+      <a href="#drawing" data-v="drawing"><svg viewBox="0 0 20 20"><path d="M3 4h14v12H3zM6 13l3-4 2 2 3-4M6 7h.01"/></svg><span>แบบ / Point No.</span><b class="badge" id="ptCount"></b></a>
       <a href="#summary" data-v="summary"><svg viewBox="0 0 20 20"><path d="M4 16V9M8 16V5M12 16v-5M16 16V7"/></svg><span>สรุปรวม</span></a>
     </div>
     <div class="sgroup">
@@ -487,12 +520,13 @@ body.dv-tab .tcard svg.ic3{width:64px;height:36px}
     <svg viewBox="0 0 20 20" class="dvico"><rect x="2" y="4" width="11" height="8" rx="1"/><rect x="12" y="8" width="6" height="9" rx="1"/></svg>
     <div class="lang" id="langSeg"><button data-lang="th">TH</button><button data-lang="en">EN</button></div>
     <label class="dvsel">ใช้บน <select id="dvSel"><option value="auto">อัตโนมัติ</option><option value="pc">คอมพิวเตอร์</option><option value="tab">แท็บเล็ต</option><option value="mob">มือถือ</option></select></label>
-  </div><h1>PID Duct Calculation</h1><p>คำนวณพื้นที่ผิว ปริมาตร และจำนวนแผ่น PID Duct (Pre-insulated Panel) ทุกประเภทข้อต่อ</p><i></i></header>
+  </div><h1>Duct BOQ</h1><p>คำนวณพื้นที่ผิว ปริมาตร และจำนวนแผ่น PID Duct (Pre-insulated Panel) ทุกประเภทข้อต่อ</p><i></i></header>
 <main>
   <div class="phead" id="phead">
     <div class="pt"><div class="pn" id="phName"></div><div class="pl" id="phLoc"></div><div class="pl" id="phCfg" style="font-size:13px"></div></div>
     <button class="btn sm ghost" id="phEdit">✎ แก้ไขโครงการ</button>
-    <nav class="tabs sub"><a href="#items" data-v="items">รายการท่อลม</a><a href="#summary" data-v="summary">สรุปรวม</a></nav>
+    <div class="phact"><button class="btn sm ob1" id="phSave"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h10l3 3v11H4z"/><path d="M7 3v4h6V3M7 17v-5h7v5"/></svg>บันทึก</button><button class="btn sm ob2" id="phFile"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"/></svg>บันทึกไฟล์</button><button class="btn sm ob2" id="phDel"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12M8 6V4h4v2M6 6l1 11h6l1-11"/></svg>ลบโครงการ</button></div>
+    <nav class="tabs sub"><a href="#items" data-v="items">รายการท่อลม</a><a href="#drawing" data-v="drawing">แบบ / Point No.</a><a href="#summary" data-v="summary">สรุปรวม</a></nav>
   </div>
   <details class="settings" id="settings" style="display:none">
     <summary>⚙ ตั้งค่าโครงการ <span class="sum-txt" id="setTxt"></span></summary>
@@ -537,11 +571,38 @@ body.dv-tab .tcard svg.ic3{width:64px;height:36px}
       <div class="rows" id="list"></div>
       <div class="bar" style="margin-top:12px">
         <span class="spacer"></span>
-        <button class="btn ghost sm" data-x="excel">ส่งออก Excel</button><button class="btn ghost sm" data-x="pdf">ส่งออก PDF</button><button class="btn ghost sm" id="copyItems">คัดลอกตาราง (วาง Excel)</button>
+        <button class="btn ghost sm" data-x="excel">ส่งออก Excel</button><button class="btn ghost sm" data-x="pdf">ส่งออก PDF</button><button class="btn sm primary" id="lineBtn">✓ Submit</button><button class="btn sm line" id="shareBtn" hidden><svg viewBox="0 0 20 20" width="15" height="15"><path fill="currentColor" d="M10 2.5c-4.4 0-8 2.9-8 6.4 0 3.2 2.8 5.8 6.6 6.3.3.1.6.2.7.4.1.2.1.5 0 .7l-.1.7c0 .2-.2.8.7.4s4.8-2.8 6.5-4.9c1.1-1.3 1.6-2.5 1.6-3.6 0-3.5-3.6-6.4-8-6.4z"/></svg>แชร์</button><button class="btn ghost sm" id="copyItems">คัดลอกตาราง (วาง Excel)</button>
         
         <button class="btn ghost sm" id="clearBtn">ล้างทั้งหมด</button>
       </div>
     </section>
+   </div>
+  </section>
+
+  <section id="v-drawing" hidden>
+   <div class="dw-card">
+    <div class="dw-h"><b>SCHEMATIC WORKSPACE</b><span class="hint2" id="dwPopName"></span><span class="spacer"></span><span class="hint2" id="dwScTxt"></span><button class="btn sm dw-pophide" id="dwPop" title="เปิดพื้นที่วาดในหน้าต่างใหม่ (ลากไปจออีกจอได้)">⧉ แยกหน้าต่าง</button><button class="btn sm" id="dwMax" title="ขยายเต็มจอ">⛶ เต็มจอ</button></div>
+    <div class="dw-tb" id="dwTools">
+      <button class="btn sm" data-dt="sel">เลือก (Select)</button><button class="btn sm" data-dt="pt">📍 ระบุ Point No.</button><button class="btn sm" data-dt="seg">วาด Segment</button><button class="btn sm" data-dt="cal">Calibrate Scale</button>
+      <button class="btn sm" id="dwUp">อัปโหลดแบบ (PDF / PNG / JPG)</button><button class="btn sm" id="dwBg">ลบพื้นหลัง</button><button class="btn sm" id="dwUndo">↶ Undo</button><button class="btn sm danger" id="dwClr">ลบทั้งหมด</button>
+    </div>
+    <div class="dw-tb">
+      <button class="btn sm" id="dwZo">−</button><span class="dw-z" id="dwZt">100%</span><button class="btn sm" id="dwZi">+</button><button class="btn sm" id="dwFit">Fit</button>
+      <span class="dw-sep"></span>
+      <label class="dw-l">กระดาษ <select id="dwPaper"><option>A0</option><option>A1</option><option>A2</option><option selected>A3</option><option>A4</option></select></label>
+      <label class="dw-l"><select id="dwOri"><option value="L">แนวนอน</option><option value="P">แนวตั้ง</option></select></label>
+      <label class="dw-l">มาตราส่วน 1 : <input type="number" id="dwN" min="1" step="1" value="100"></label>
+      <button class="btn sm primary" id="dwApply">ใช้สเกลกระดาษ</button>
+      <label class="dw-l" id="dwPgW" hidden>หน้า PDF <select id="dwPg"></select></label>
+    </div>
+    <div class="dw-vp" id="dwVp"><div id="dwSt"><img id="dwImg" alt="" draggable="false"><svg id="dwSvg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      <div class="dw-empty" id="dwEmpty">ยังไม่มีแบบ — กด “อัปโหลดแบบ” (PDF / PNG / JPG) หรือวาดบนกริดได้เลย</div>
+      <div class="dw-busy" id="dwBusy" hidden>กำลังโหลดแบบ…</div></div>
+    <div class="dw-hint" id="dwHint"></div>
+   </div>
+   <div class="dw-lists">
+    <div class="dw-card"><div class="dw-h"><b>Point No.</b><span class="spacer"></span><span class="hint2" id="dwPtN"></span></div><div class="tbl-wrap"><table class="dw-t" id="dwPts"></table></div></div>
+    <div class="dw-card"><div class="dw-h"><b>Segment (ความยาวตามสเกล)</b><span class="spacer"></span><span class="hint2" id="dwSgN"></span></div><div class="tbl-wrap"><table class="dw-t" id="dwSegs"></table></div></div>
    </div>
   </section>
 
@@ -608,6 +669,14 @@ body.dv-tab .tcard svg.ic3{width:64px;height:36px}
 <div class="modal" id="dModal"><div class="box dbox"><div class="dhead"><h3 id="dmTitle"></h3><div class="vtog" id="vTog2" style="margin:0"><button type="button" data-v3="d2">2D</button><button type="button" data-v3="d3">3D</button><button type="button" data-v3="iso">Isometric</button></div><button class="icon" id="dmClose" title="ปิด">✕</button></div><div class="diag dbig" id="dmBody"></div><div class="dsub" id="dmSub"></div></div></div>
 <div class="modal" id="hModal"><div class="box" style="max-width:640px"><h3 id="hmTitle"></h3><div id="hmBody"></div>
   <div class="row"><button class="btn danger" id="hmDel">ลบบันทึก</button><span class="spacer"></span><button class="btn" id="hmCopy">คัดลอก (วาง Excel)</button><button class="btn" id="hmNew">สร้างโครงการจากบันทึกนี้</button><button class="btn primary" id="hmClose">ปิด</button></div></div></div>
+<div class="modal" id="lnModal"><div class="box" style="max-width:480px"><h3 style="display:flex;align-items:center;gap:8px"><span class="lnico">LINE</span>แชร์ผลถอดปริมาณ</h3><div class="hint" id="lnSub" style="margin:-6px 0 10px;color:var(--accent-ink);font-weight:600"></div>
+  <div class="hint" style="margin:-4px 0 8px">ข้อความสรุปที่จะส่ง</div><textarea id="lnText" style="width:100%;min-height:150px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-family:inherit;font-size:14px;line-height:1.45;resize:vertical"></textarea>
+  <div class="lnact"><button class="btn line" id="lnShare">แชร์ไฟล์ Excel + ข้อความ (เลือก LINE)</button>
+   <a class="btn line ghostl" id="lnLink" target="_blank" rel="noopener">เปิด LINE ส่งข้อความสรุป</a>
+   <div class="lnrow"><button class="btn sm" id="lnXlsx">⬇ ดาวน์โหลด Excel</button><button class="btn sm" id="lnPdf">⬇ ส่งออก PDF</button><button class="btn sm" id="lnCopy">คัดลอกข้อความ</button></div></div>
+  <p class="hint" id="lnNote" style="margin:8px 0 0"></p>
+  <div class="row"><button class="btn" id="lnClose">ปิด</button></div></div></div>
+<div class="modal" id="nModal"><form class="box" id="nForm"><h3 id="nTitle"></h3><div class="fld"><label id="nLab"></label><input id="nVal" type="number" step="any" min="0" style="font-size:18px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;width:100%"></div><div class="row"><button type="button" class="btn" id="nNo">ยกเลิก</button><button class="btn primary">ตกลง</button></div></form></div>
 <div class="modal" id="modal"><div class="box"><h3 id="mTitle"></h3><div id="mBody"></div><div class="row"><button class="btn" id="mNo">ยกเลิก</button><button class="btn primary" id="mYes">ตกลง</button></div></div></div>
 
 <script>
@@ -680,7 +749,7 @@ function openProject(id, quiet){
   store.cur=id; const p=proj();
   cfg = Object.assign({},CFG0,p.cfg); items = p.items; uid=1;
   items.forEach(it=>{ if(!it.id) it.id = uid++; else uid = Math.max(uid, it.id+1); });
-  editingId=null; filter='all'; draft = newDraft();
+  editingId=null; filter='all'; draft = newDraft(); DW.pid=null;
   document.getElementById('pname').textContent = p.name;
   if(!quiet){ syncSettings(); renderList(); renderForm(false); save(); }
 }
@@ -1030,6 +1099,7 @@ function render3D(F,dims,title){
     if(f.m){ const ext=Math.min(...f.p.map((p,i)=>{ const q=f.p[(i+Math.floor(f.p.length/2))%f.p.length]; return Math.hypot(p[0]-q[0],p[1]-q[1],p[2]-q[2]); })), d=Math.max(f.m, ext*0.045), I=inset3(f.p,d);
       const op=f.p.map(p=>S(p).join(',')), ip=I.map(p=>S(p).join(','));
       return `<polygon points="${ip.join(' ')}" fill="#ffffff" stroke="#39403d" stroke-width="0.8"/>${(f.vl||[]).map(([a,b])=>{ const p=S(a),q=S(b); return `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="${f.vlc||'#1e40af'}" stroke-width="2"/>`; }).join('')}<path d="M${op.join('L')}Z M${ip.join('L')}Z" fill-rule="evenodd" fill="rgb(${c})" stroke="#39403d" stroke-width="1.1" stroke-linejoin="round"/>`; }
+    if(f.bl) return `<polygon points="${f.p.map(p=>S(p).join(',')).join(' ')}" fill="rgb(${c})" fill-opacity="${iso?0.9:0.82}" stroke="#2b302d" stroke-width="1" stroke-linejoin="round"/>`;
     return `<polygon points="${f.p.map(p=>S(p).join(',')).join(' ')}" fill="rgb(${c})" stroke="${f.e===0?`rgb(${c})`:f.e===1?(iso?'#adb5bd':'#6c757d'):(iso?'#212529':'#39403d')}" stroke-width="${f.e===0?0.6:f.e===1?0.7:(iso?1.1:1.2)}" stroke-linejoin="round"/>`+SL(f); }).join('');
   // silhouette-ish outline for side strips: draw top/bottom edges of strips
   out+=dims.map(d=>{ const a=S(d.a), b=S(d.b), lx=(a[0]+b[0])/2+(d.lx||0), ly=(a[1]+b[1])/2+(d.ly||0); return dm(a[0],a[1],b[0],b[1],d.k,lx,ly,d.an||'middle'); }).join('');
@@ -1045,6 +1115,9 @@ function model3D(){
   let F=[];
   const rr=Math.max(8,Math.min(W,H)*0.02), rod=(P)=>{ const fs=[]; for(let i=0;i<P.length-1;i++) fs.push(...tube([P[i],P[i+1]],[rr,rr],'rod',false)); fs.forEach(f=>f.ly=1); F.push(...fs); },
     dot=(p)=>{ F.push({p:ring(p,[0.577,0.577,0.577],rr*2.4,24),c:'or',ly:2}); },
+    blade=(a,b,up,hh)=>{ const sb=(u,v)=>[u[0]-v[0],u[1]-v[1],u[2]-v[2]], ad=(u,v,k=1)=>[u[0]+v[0]*k,u[1]+v[1]*k,u[2]+v[2]*k], cr=(u,v)=>[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]], nz=u=>{ const l=Math.hypot(...u)||1; return u.map(x=>x/l); };
+      const gi=isGI(draft), w=gi?Math.max(rr*0.9,6):Math.max(rr*1.4,+draft.t||20), h=hh||rr*1.1, d=nz(sb(b,a)), n=nz(cr(d,up)), A0=ad(a,n,-w/2), A1=ad(a,n,w/2), B0=ad(b,n,-w/2), B1=ad(b,n,w/2), U=q=>ad(q,up,h), c=gi?'gi':'pid';
+      [[A0,B0,B1,A1],[U(A0),U(B0),U(B1),U(A1)],[A0,B0,U(B0),U(A0)],[A1,B1,U(B1),U(A1)],[A0,A1,U(A1),U(A0)],[B0,B1,U(B1),U(B0)]].forEach(p=>F.push({p,c,ly:1,bl:1})); },
     part=(a,b)=>{ const fs=tube([a,b],[rr*0.5,rr*0.5],'part',false); fs.forEach(f=>f.ly=1); F.push(...fs); };
 
   switch(T){
@@ -1061,7 +1134,7 @@ function model3D(){
       const B=[[L,0,0],[L,W2,0],[L,W2,H2],[L,0,H2]].map(p=>[p[0],p[1]-(flat?W/2:W2/2),p[2]-(flat?0:H2/2)]);
       F=loft(A,B,'pid',t);
       if(T==='คางหมู'&&draft.sd==='yes'){ const zt1=B[0][2]+H2, yH=x=>A[1][1]+(B[1][1]-A[1][1])*x/L, yL=x=>A[0][1]+(B[0][1]-A[0][1])*x/L, xs=2, zs=A[0][2]+0.2*H, slp=(zt1-A[0][2]-H)/L, xt=xs+0.9*(A[0][2]+H-zs)/(1-slp), zt=zs+(xt-xs);
-        const lg=leafGeo('trap',null,{H,L,zt0:A[0][2]+H-A[0][2],zt1:zt1-A[0][2]}), P3=q=>[q[0],yH(Math.max(0,Math.min(q[0],L)))+rr,A[0][2]+q[1]]; rod([P3(lg.p),P3(lg.w),P3(lg.x),P3([lg.x[0]-100,lg.x[1]])]); const fs=tube([P3(lg.h),P3(lg.e)],[rr*1.6,rr*1.6],'leaf3',false); fs.forEach(f=>f.ly=1); F.push(...fs); dot(P3(lg.h)); }
+        const lg=leafGeo('trap',null,{H,L,zt0:A[0][2]+H-A[0][2],zt1:zt1-A[0][2]}), P3=q=>[q[0],yH(Math.max(0,Math.min(q[0],L)))+rr,A[0][2]+q[1]]; { const P0=q=>{ const x=Math.max(0,Math.min(q[0],L)); return [q[0],yL(x),A[0][2]+q[1]]; }; blade(P0(lg.h),P0(lg.e),[0,1,0],yH(Math.max(0,Math.min(lg.h[0],L)))-yL(Math.max(0,Math.min(lg.h[0],L)))+rr); } rod([P3(lg.p),P3(lg.w),P3(lg.x),P3([lg.x[0]-100,lg.x[1]])]); dot(P3(lg.h)); }
       dims.push({a:[0,W/2+60,A[0][2]],b:[L,W/2+60,A[0][2]],k:'L',ly:16},{a:[-40,-W/2,A[0][2]],b:[-40,-W/2,A[0][2]+H],k:'H',lx:-10,an:'end'}); break; }
     case 'Offset': case 'ท่อยู': { const H0=H, isU=T==='ท่อยู', B0=num(draft.off)??400, th=Math.min(Math.max(num(draft.ang)??45,10),80)*Math.PI/180, run=B0/Math.tan(th), e=Math.max(H0*1.2,200), Lm=num(draft.L)??600;
       const C=isU?[[0,0],[e,0],[e+run,-B0],[e+run+Lm,-B0],[e+2*run+Lm,0],[2*e+2*run+Lm,0]]:[[0,0],[e,0],[e+run,B0],[2*e+run,B0]];
@@ -1072,13 +1145,13 @@ function model3D(){
       dims.push({a:[xe+40,0,-H0/2],b:[xe+40,W,-H0/2],k:'W',lx:14,ly:8},{a:[xe+40,W,-H0/2],b:[xe+40,W,H0/2],k:'H',lx:10,an:'start'}); break; }
     case 'สามทาง': case 'สี่ทาง': { const G=T==='สามทาง'?teeGeo(draft,{W:600,H:400,Wa:400,Wb:400,R:150,L:750,Lc:150}):fourGeo(draft,{W:800,H:400,Wa:400,Wb:400,R:150,L:750,Lc:150});
       if(G){ const e1=(u,v)=>Math.abs(u-v)<1e-6; F=prismXY(G.pts.map(([x,y])=>[y,x]),0,H,'pid',(i,a,b)=>{ const [ya,xa]=a,[yb,xb]=b; if(Math.hypot(xa-xb,ya-yb)<1) return false; return (e1(ya,0)&&e1(yb,0))||(e1(ya,G.L)&&e1(yb,G.L))||(e1(xa,-G.R)&&e1(xb,-G.R))||(T==='สี่ทาง'&&e1(xa,G.W+G.R)&&e1(xb,G.W+G.R)); },t); const e=Math.max(240,G.W*0.45);
-        const zt=H+rr, P3=q=>[q[1],q[0],zt], leaf3=lg=>{ rod([P3(lg.p),P3(lg.w),P3(lg.x),...(lg.k?[P3(lg.k)]:[])]); const fs=tube([P3(lg.h),P3(lg.e)],[rr*1.6,rr*1.6],'leaf3',false); fs.forEach(f=>f.ly=1); F.push(...fs); dot(P3(lg.h)); }; if(T==='สามทาง'){ leaf3(leafGeo('tee',G)); }
+        const zt=H+rr, P3=q=>[q[1],q[0],zt], leaf3=lg=>{ blade([lg.h[1],lg.h[0],0],[lg.e[1],lg.e[0],0],[0,0,1],H+rr); rod([P3(lg.p),P3(lg.w),P3(lg.x),...(lg.k?[P3(lg.k)]:[])]); dot(P3(lg.h)); }; if(T==='สามทาง'){ leaf3(leafGeo('tee',G)); }
         else if(G.sdOn){ leaf3(leafGeo('fourL',G)); leaf3(leafGeo('fourR',G)); }
         dims.push({a:[-60,0,0],b:[-60,G.W,0],k:'W',lx:-14,ly:10},{a:[0,-60-(T==='สี่ทาง'?G.R+G.B:0),0],b:[G.L,-60-(T==='สี่ทาง'?G.R+G.B:0),0],k:'L',ly:-8});
         if(T==='สามทาง'){ const rt=p=>[p[1],-p[0],p[2]]; F=F.filter(f=>f.c!=='or'); F.forEach(f=>{ f.p=f.p.map(rt); if(f.vl) f.vl=f.vl.map(l=>l.map(rt)); if(f.sil) f.sil=f.sil.map(l=>l.map(rt)); if(f.n) f.n=rt(f.n); }); { const lg=leafGeo('tee',G); dot([lg.h[0],-lg.h[1],H+rr]); } dims.forEach(d=>{ d.a=rt(d.a); d.b=rt(d.b); }); dims.length=0; dims.push({a:[0,60,0],b:[G.W,60,0],k:'W',ly:16},{a:[G.W+60,0,0],b:[G.W+60,-G.L,0],k:'L',lx:12,an:'start'}); } } break; }
-    case 'กล่องหัวจ่าย': { const L=dv('L'), hasN=draft.bx==='slot'||!!(num(draft.W2)&&num(draft.H2)), W1=hasN?dv('W2'):0, H1=hasN?dv('H2'):0, D=num(draft.D)||Math.min(H*0.7,250), E=num(draft.off); const ey=E===null?(draft.bx==='slot'&&draft.np!=='center'?W-W1:(W-W1)/2):E, top=draft.cp==='top', nH=Math.max(1,Math.round(num(draft.nh)||1));
+    case 'กล่องหัวจ่าย': { const L=dv('L'), hasN=draft.bx==='slot'||!!(num(draft.W2)&&num(draft.H2)), W1=hasN?dv('W2'):0, H1=hasN?dv('H2'):0, D=num(draft.D)||Math.min(H*0.7,250), E=num(draft.off); const ey=E===null?(draft.bx==='slot'&&draft.np!=='center'?0:(W-W1)/2):E, top=draft.cp==='top', nH=Math.max(1,Math.round(num(draft.nh)||1));
       F=[...boxF(0,0,H1,L,W,H1+H,'pid'),...(hasN?boxF(0,ey,0,L,ey+W1,H1,'pid'):[])];
-      for(let i=0;i<nH;i++){ const fs=top?tube([[L*(i+0.5)/nH,W/2,H1+H],[L*(i+0.5)/nH,W/2,H1+H+120]],[D/2,D/2],'gi'):tube([[L,W*(i+0.5)/nH,H1+H/2],[L+120,W*(i+0.5)/nH,H1+H/2]],[D/2,D/2],'gi'); fs.forEach(f=>f.ly=1); F.push(...fs); }
+      for(let i=0;i<nH;i++){ const fs=top?tube([[L*(i+0.5)/nH,W/2,H1+H],[L*(i+0.5)/nH,W/2,H1+H+120]],[D/2,D/2],'gi'):tube([[L*(i+0.5)/nH,W,H1+H/2],[L*(i+0.5)/nH,W+120,H1+H/2]],[D/2,D/2],'gi'); fs.forEach(f=>f.ly=1); F.push(...fs); }
       dims.push({a:[0,W+60,0],b:[L,W+60,0],k:draft.bx==='sq'?'W':'L',ly:16},{a:[-40,0,H1+H],b:[-40,W,H1+H],k:'W',lx:-14,ly:-6},{a:[0,W+40,H1],b:[0,W+40,H1+H],k:'H',lx:-10,an:'end'}); break; }
     case 'กลม-ตรง': { const D=dv('D'), L=dv('L'); F=tube([[0,0,0],[L,0,0]],[D/2,D/2],'gi'); dims.push({a:[0,D/2+60,-D/2],b:[L,D/2+60,-D/2],k:'L',ly:16}); break; }
     case 'กลม-ลด': { const D1=dv('D'), D2=dv('D2'), L=dv('L'); F=tube([[0,0,0],[L,0,0]],[D1/2,D2/2],'gi'); dims.push({a:[0,D1/2+60,-D1/2],b:[L,D1/2+60,-D1/2],k:'L',ly:16}); break; }
@@ -1220,16 +1293,16 @@ function diagramSVG(){
         ${dm(xe+14,y0-hk,xe+14,y0+hk,'H',xe+18,y0+5,'start')}${sec(286,128,56,56,'W','H','หน้าตัด')}`; break; }
     case 'กล่องหัวจ่าย': {
       const L=dv('L'), W=dv('W'), H=dv('H'), hasN=draft.bx==='slot'||!!(num(draft.W2)&&num(draft.H2)), W1=hasN?dv('W2'):0, H1=hasN?dv('H2'):0, D=num(draft.D)||Math.min(H*0.7,250), top=draft.cp==='top', n=Math.max(1,Math.round(num(draft.nh)||1));
-      const k=Math.min(220/(L+W), 130/(H+H1)), x0=40, y0=top?62:52, lw=L*k, hh=H*k, nh=H1*k, cw=14, sx=x0+lw+(top?56:70), ww=W*k, nw=W1*k; VH=240;
-      const E=num(draft.off), ex=hasN?(E===null?(draft.bx==='slot'&&draft.np!=='center'?W-W1:(W-W1)/2):Math.min(Math.max(E,0),W-W1))*k:0, nx=sx+ex, dk=Math.min(D*k, top?lw/n*0.8:Math.min(hh*0.9,ww/n*0.85));
+      const k=Math.min(220/(L+W), 130/(H+H1)), x0=40, y0=62, lw=L*k, hh=H*k, nh=H1*k, cw=14, sx=x0+lw+(top?56:70), ww=W*k, nw=W1*k; VH=240;
+      const E=num(draft.off), ex=hasN?(E===null?(draft.bx==='slot'&&draft.np!=='center'?0:(W-W1)/2):Math.min(Math.max(E,0),W-W1))*k:0, nx=sx+ex, dk=Math.min(D*k, top?lw/n*0.8:Math.min(hh*0.9,lw/n*0.85));
       const tab=(x)=>`<rect x="${x}" y="${y0-9}" width="${Math.min(10,lw*0.1)}" height="9" fill="#e3e9f0" stroke="#39403d" stroke-width="1"/>`;
-      b = `<text class="cap" x="${x0+lw/2}" y="${y0-(top?46:30)}" text-anchor="middle">ด้านหน้า</text>
+      b = `<text class="cap" x="${x0+lw/2}" y="${y0-46}" text-anchor="middle">${top?'ด้านหน้า':'ด้านหลัง'}</text>
         <rect class="ob" x="${x0}" y="${y0}" width="${lw}" height="${hh}"/>${hasN?`<rect class="ob" x="${x0}" y="${y0+hh}" width="${lw}" height="${nh}"/>`:''}
         ${dm(x0,y0+hh+nh+14,x0+lw,y0+hh+nh+14,draft.bx==='sq'?'W':'L',x0+lw/2,y0+hh+nh+29)}${dm(x0-12,y0,x0-12,y0+hh,'H',x0-16,y0+hh/2+5,'end')}${hasN?dm(x0-12,y0+hh,x0-12,y0+hh+nh,'H2',x0-16,y0+hh+nh/2+5,'end'):''}
-        <text class="cap" x="${sx+ww/2}" y="${y0-(top?46:30)}" text-anchor="middle">ด้านข้าง</text>
+        <text class="cap" x="${sx+ww/2}" y="${y0-46}" text-anchor="middle">ด้านข้าง</text>
         <rect class="ob" x="${sx}" y="${y0}" width="${ww}" height="${hh}"/>${hasN?`<rect class="ob" x="${nx}" y="${y0+hh}" width="${nw}" height="${nh}"/>`:''}${hasN&&E!==null?dm(sx,y0+hh+nh+34,nx,y0+hh+nh+34,'off',(sx+nx)/2,y0+hh+nh+48)+ext(sx,y0+hh,sx,y0+hh+nh+38):''}
         ${top?`${Array.from({length:n},(_,i)=>`<rect x="${x0+lw*(i+0.5)/n-dk/2}" y="${y0-12}" width="${dk}" height="12" fill="#fff" stroke="#39403d" stroke-width="1.4"/>`).join('')}<rect x="${sx+ww/2-dk/2}" y="${y0-12}" width="${dk}" height="12" fill="#fff" stroke="#39403d" stroke-width="1.4"/>${dm(x0+lw/(2*n)-dk/2,y0-20,x0+lw/(2*n)+dk/2,y0-20,'D',x0+lw/(2*n),y0-24)}`
-          :`<rect x="${x0+lw}" y="${y0+hh/2-dk/2}" width="${cw}" height="${dk}" fill="#fff" stroke="#39403d" stroke-width="1.4"/>${Array.from({length:n},(_,i)=>`<circle cx="${sx+ww*(i+0.5)/n}" cy="${y0+hh/2}" r="${dk/2}" fill="#fff" stroke="#39403d" stroke-width="1.4"/>`).join('')}${dm(sx+ww*0.5/n-dk/2,y0+hh+nh+(hasN?36:12),sx+ww*0.5/n+dk/2,y0+hh+nh+(hasN?36:12),'D',sx+ww*0.5/n,y0+hh+nh+(hasN?51:27))}${ext(sx+ww*0.5/n-dk/2,y0+hh/2,sx+ww*0.5/n-dk/2,y0+hh+nh+(hasN?40:16))}${ext(sx+ww*0.5/n+dk/2,y0+hh/2,sx+ww*0.5/n+dk/2,y0+hh+nh+(hasN?40:16))}`}
+          :`${Array.from({length:n},(_,i)=>`<circle cx="${x0+lw*(i+0.5)/n}" cy="${y0+hh/2}" r="${dk/2}" fill="#fff" stroke="#39403d" stroke-width="1.4"/>`).join('')}<rect x="${sx+ww}" y="${y0+hh/2-dk/2}" width="${cw}" height="${dk}" fill="#fff" stroke="#39403d" stroke-width="1.4"/>${dm(x0+lw*0.5/n-dk/2,y0-14,x0+lw*0.5/n+dk/2,y0-14,'D',x0+lw*0.5/n,y0-18)}${ext(x0+lw*0.5/n-dk/2,y0+hh/2,x0+lw*0.5/n-dk/2,y0-18)}${ext(x0+lw*0.5/n+dk/2,y0+hh/2,x0+lw*0.5/n+dk/2,y0-18)}`}
         ${dm(sx,y0-(top?26:10),sx+ww,y0-(top?26:10),'W',sx+ww/2,y0-(top?30:14))}
         ${hasN?dm(nx,y0+hh+nh+14,nx+nw,y0+hh+nh+14,'W2',nx+nw/2,y0+hh+nh+29):''}`; break; }
     case 'ฮูด': {
@@ -1519,7 +1592,7 @@ function renderForm(focusFirst){
   const T = draft.type;
   const CAT=(curCat&&inCat(T,curCat))?curCat:(TYPES[T].cat||'rect'); curCat=CAT; document.querySelectorAll('#catTabs button').forEach(b=>b.classList.toggle('on',b.dataset.cat===CAT));
   document.getElementById('typeGrid').innerHTML = TN.filter(t=>inCat(t,CAT)&&(!TYPES[t].hidden||t===T)).map(t=>`<button class="tcard ${t===T?'on':''}" data-type="${t}" style="--tc:${TYPES[t].c}">${icon3D(t)}${TYPES[t].short||t}</button>`).join('');
-  document.getElementById('fFields').innerHTML = FDEF[T].filter(f=>!(T==='กล่องหัวจ่าย'&&draft.bx==='sq'&&f[0]==='L')&&!(T==='กล่องหัวจ่าย'&&draft.bx!=='slot'&&f[1]==='np')).map(f=>T==='กล่องหัวจ่าย'&&draft.bx==='slot'?(f[0]==='#'&&f[1].startsWith('คอหัวจ่าย')?['#','คอ Slot ด้านล่าง']:f[0]==='W2'?['W2','ความกว้างคอ Slot (W1)','mm']:f[0]==='H2'?['H2','ความสูงคอ Slot (H1)','mm']:f[0]==='off'?['off','ระยะคอจากขอบซ้าย','mm','full',draft.np==='center'?'เว้นว่าง = กึ่งกลาง':'เว้นว่าง = ชิดขอบหน้า']:f):f).map(f=> f[0]==='TOG' ? `<div class="big full"><label>${f[2]}</label><div class="seg2">${f[3].split('|').map(o=>{ const [v,l]=o.split(':'); return `<button type="button" data-tog="${f[1]}:${v}" class="${(draft[f[1]]||f[3].split(':')[0])===v?'on':''}">${l}</button>`; }).join('')}</div></div>` : f[0]==='BX' ? `<div class="big full"><label>แบบกล่อง</label><div class="seg2" id="bxSeg">${[['sq','จัตุรัส'],['rect','ผืนผ้า'],['slot','Slot air duct']].map(([v,l])=>`<button type="button" data-bx="${v}" class="${(draft.bx||'rect')===v?'on':''}">${l}</button>`).join('')}</div></div>` : f[0]==='GV' ? `<div class="big full"><label>${draft.type==='สี่ทาง'?'ใบไกด์ในทางแยก (RT-13.1)':draft.type==='สามทาง'?'ใบไกด์ในทางแยก (RT-12.1)':(draft.type==='ข้องอฉาก'?'ใบไกด์ข้องอฉาก':'ใบไกด์ในข้องอ (RT-36)')}</label><div class="seg2" id="gvSeg"><button type="button" data-gv="no" class="${draft.gv!=='yes'?'on':''}">ไม่มี</button><button type="button" data-gv="yes" class="${draft.gv==='yes'?'on':''}">${draft.type==='ข้องอฉาก'?'มีใบไกด์ (Turning vanes)':draft.type.startsWith('ข้องอ')?'มีใบไกด์ (2 ใบ)':'มีใบไกด์ (2 ใบ/ทางแยก)'}</button></div></div>` : f[0]==='ANG' ? `<div class="big full"><label>มุม</label><div class="seg2" id="angSeg">${[90,45].map(a=>`<button type="button" data-ang="${a}" class="${+(draft.ang||90)===a?'on':''}">${a}°</button>`).join('')}</div></div>` : f[0]==='CP' ? `<div class="big full"><label>ตำแหน่งเจาะรูคอกลม</label><div class="seg2" id="cpSeg"><button type="button" data-cp="side" class="${draft.cp!=='top'?'on':''}">ด้านข้าง (หัวท้าย)</button><button type="button" data-cp="top" class="${draft.cp==='top'?'on':''}">ด้านบน</button></div></div>` : f[0]==='SD' ? `<div class="big full"><label>Split damper</label><div class="seg2" id="sdSeg"><button type="button" data-sd="no" class="${draft.sd!=='yes'?'on':''}">ไม่มี</button><button type="button" data-sd="yes" class="${draft.sd==='yes'?'on':''}">มี Split damper</button></div></div>` : f[0]==='AL' ? `<div class="big full"><label>แนวท่อ <span style="opacity:.7">(ชิดด้าน = พื้น/ข้างเรียบ, กึ่งกลาง = ลาดเท่ากัน)</span></label><div class="seg2" id="alSeg"><button type="button" data-al="flat" class="${(draft.al||'flat')==='flat'?'on':''}">ชิดด้านเดียว</button><button type="button" data-al="center" class="${draft.al==='center'?'on':''}">กึ่งกลาง</button></div></div>` : f[0]==='#' ? `<div class="sub">${f[1]}</div>` : bigField(f[0],f[1],f[2],f[3],f[4])).join('');
+  document.getElementById('fFields').innerHTML = FDEF[T].filter(f=>!(T==='กล่องหัวจ่าย'&&draft.bx==='sq'&&f[0]==='L')&&!(T==='กล่องหัวจ่าย'&&draft.bx!=='slot'&&f[1]==='np')).map(f=>T==='กล่องหัวจ่าย'&&draft.bx==='slot'?(f[0]==='#'&&f[1].startsWith('คอหัวจ่าย')?['#','คอ Slot ด้านล่าง']:f[0]==='W2'?['W2','ความกว้างคอ Slot (W1)','mm']:f[0]==='H2'?['H2','ความสูงคอ Slot (H1)','mm']:f[0]==='off'?['off','ระยะคอจากขอบซ้าย','mm','full',draft.np==='center'?'เว้นว่าง = กึ่งกลาง':'เว้นว่าง = ชิดขอบหน้า']:f):f).map(f=> f[0]==='TOG' ? `<div class="big full"><label>${f[2]}</label><div class="seg2">${f[3].split('|').map(o=>{ const [v,l]=o.split(':'); return `<button type="button" data-tog="${f[1]}:${v}" class="${(draft[f[1]]||f[3].split(':')[0])===v?'on':''}">${l}</button>`; }).join('')}</div></div>` : f[0]==='BX' ? `<div class="big full"><label>แบบกล่อง</label><div class="seg2" id="bxSeg">${[['sq','จัตุรัส'],['rect','ผืนผ้า'],['slot','Slot air duct']].map(([v,l])=>`<button type="button" data-bx="${v}" class="${(draft.bx||'rect')===v?'on':''}">${l}</button>`).join('')}</div></div>` : f[0]==='GV' ? `<div class="big full"><label>${draft.type==='สี่ทาง'?'ใบไกด์ในทางแยก (RT-13.1)':draft.type==='สามทาง'?'ใบไกด์ในทางแยก (RT-12.1)':(draft.type==='ข้องอฉาก'?'ใบไกด์ข้องอฉาก':'ใบไกด์ในข้องอ (RT-36)')}</label><div class="seg2" id="gvSeg"><button type="button" data-gv="no" class="${draft.gv!=='yes'?'on':''}">ไม่มี</button><button type="button" data-gv="yes" class="${draft.gv==='yes'?'on':''}">${draft.type==='ข้องอฉาก'?'มีใบไกด์ (Turning vanes)':draft.type.startsWith('ข้องอ')?'มีใบไกด์ (2 ใบ)':'มีใบไกด์ (2 ใบ/ทางแยก)'}</button></div></div>` : f[0]==='ANG' ? `<div class="big full"><label>มุม</label><div class="seg2" id="angSeg">${[90,45].map(a=>`<button type="button" data-ang="${a}" class="${+(draft.ang||90)===a?'on':''}">${a}°</button>`).join('')}</div></div>` : f[0]==='CP' ? `<div class="big full"><label>ตำแหน่งเจาะรูคอกลม</label><div class="seg2" id="cpSeg"><button type="button" data-cp="side" class="${draft.cp!=='top'?'on':''}">ด้านหลัง</button><button type="button" data-cp="top" class="${draft.cp==='top'?'on':''}">ด้านบน</button></div></div>` : f[0]==='SD' ? `<div class="big full"><label>Split damper</label><div class="seg2" id="sdSeg"><button type="button" data-sd="no" class="${draft.sd!=='yes'?'on':''}">ไม่มี</button><button type="button" data-sd="yes" class="${draft.sd==='yes'?'on':''}">มี Split damper</button></div></div>` : f[0]==='AL' ? `<div class="big full"><label>แนวท่อ <span style="opacity:.7">(ชิดด้าน = พื้น/ข้างเรียบ, กึ่งกลาง = ลาดเท่ากัน)</span></label><div class="seg2" id="alSeg"><button type="button" data-al="flat" class="${(draft.al||'flat')==='flat'?'on':''}">ชิดด้านเดียว</button><button type="button" data-al="center" class="${draft.al==='center'?'on':''}">กึ่งกลาง</button></div></div>` : f[0]==='#' ? `<div class="sub">${f[1]}</div>` : bigField(f[0],f[1],f[2],f[3],f[4])).join('');
   let more = bigField('waste','Waste','%');
   more += (T==='สามทาง'||T==='สี่ทาง') ? `<div class="big"><label>หน้าแฟลนจ์/ชิ้น</label><div class="box"><input value="${T==='สี่ทาง'?4:3} (อัตโนมัติ)" disabled><span class="u"></span></div></div>` : bigField('ends','หน้าแฟลนจ์/ชิ้น','ปาก');
   document.getElementById('moreFields').innerHTML = more;
@@ -1600,7 +1673,7 @@ function specText(it){
     case 'สามทาง': return `${s} → ตรง ${g(it.Wa)} / แยก ${g(it.Wb)} · R${g(it.R)} · L ${g(it.L)}${it.gv==='yes'?' · ใบไกด์':''}`;
     case 'คางหมู': return `${s} → ${g(it.W2)}×${g(it.H2)} · L ${g(it.L)} · ${(it.al||'flat')==='flat'?'ชิดด้าน':'กึ่งกลาง'}${it.sd==='yes'?' · Split damper':''}`;
     case 'ท่อยู': return `${s} · ลึก ${g(it.off)} · ${g(it.ang)}° · ล่าง ${g(it.L)}`;
-    case 'กล่องหัวจ่าย': return `${({sq:'จัตุรัส',slot:'Slot',rect:'ผืนผ้า'})[it.bx||'rect']} ${it.bx==='sq'?g(it.W)+'×'+g(it.W):g(it.L)+'×'+g(it.W)}×${g(it.H)}${num(it.W2)&&num(it.H2)?` · คอ ${g(it.W2)}×${g(it.H2)}${it.off!=null&&it.off!==''?' (ห่างขอบ '+it.off+')':(it.bx==='slot'&&it.np!=='center'?' (ชิดขอบ)':' (กลาง)')}`:''} · Ø${g(it.D)}${(num(it.nh)||1)>1?' ×'+Math.round(num(it.nh))+' รู':''} ${it.cp==='top'?'ด้านบน':'ด้านข้าง'}`;
+    case 'กล่องหัวจ่าย': return `${({sq:'จัตุรัส',slot:'Slot',rect:'ผืนผ้า'})[it.bx||'rect']} ${it.bx==='sq'?g(it.W)+'×'+g(it.W):g(it.L)+'×'+g(it.W)}×${g(it.H)}${num(it.W2)&&num(it.H2)?` · คอ ${g(it.W2)}×${g(it.H2)}${it.off!=null&&it.off!==''?' (ห่างขอบ '+it.off+')':(it.bx==='slot'&&it.np!=='center'?' (ชิดขอบ)':' (กลาง)')}`:''} · Ø${g(it.D)}${(num(it.nh)||1)>1?' ×'+Math.round(num(it.nh))+' รู':''} ${it.cp==='top'?'ด้านบน':'ด้านหลัง'}`;
     case 'ฮูด': return `${s} · ฮูดโค้ง 90° · GI`;
     case 'Offset': return `${s} · เยื้อง ${g(it.off)} · ${g(it.ang)}°`;
   }
@@ -1611,13 +1684,13 @@ function renderList(){
   document.getElementById('list').innerHTML = vis.length ? vis.map(([it,i])=>{ const r=calc(it);
     return `<div class="r ${it.id===editingId?'sel':''}" data-id="${it.id}" style="--tc:${TYPES[it.type].c}">
       <span class="n">${i+1}</span>
-      <div class="t1"><em>${TYPES[it.type].short||it.type}${isGI(it)?' · GI':''}</em>${esc(it.d||'')}</div>
+      <div class="t1"><em>${TYPES[it.type].short||it.type}${isGI(it)?' · GI':''}</em>${esc(it.d||'')}${ptTags(it.id)}</div>
       <div class="qs" title="จำนวน"><button data-rq="-1" aria-label="ลดจำนวน">−</button><b>${it.qty??'?'}</b><button data-rq="1" aria-label="เพิ่มจำนวน">+</button></div>
       <div class="a">${r.aW===null?'<span class="bad">กรอกไม่ครบ</span>':`<b>${f2(r.aW)}</b><span>m² รวมเผื่อ</span>`}</div>
       <div class="ra"><button class="icon" data-ract="view" title="ดูรูป">🔍</button><button class="icon" data-ract="dup" title="ทำสำเนา">⧉</button><button class="icon danger" data-ract="del" title="ลบ">✕</button></div>
       <div class="t2">${esc(specText(it))}</div></div>`; }).join('')
     : `<div class="empty" style="border:0">ยังไม่มีรายการ — กรอกฟอร์มแล้วกด “+ เพิ่มรายการ”</div>`;
-  renderTotals();
+  renderTotals(); updShare();
 }
 function updateRes(){}
 
@@ -1810,9 +1883,9 @@ document.getElementById('projList').addEventListener('click', e=>{
   const c=e.target.closest('[data-p]'); if(!c) return; const p=store.projects.find(x=>x.id===c.dataset.p);
   const a=e.target.closest('[data-pa]');
   if(a?.dataset.pa==='edit') return openPModal(p);
-  if(a?.dataset.pa==='dup'){ const n=JSON.parse(JSON.stringify(p)); n.id=pid(); n.name=p.name+' (สำเนา)'; n.created=n.updated=Date.now(); store.projects.push(n); save(); renderProjects(); toast('ทำสำเนาโครงการแล้ว'); return; }
+  if(a?.dataset.pa==='dup'){ const n=JSON.parse(JSON.stringify(p)); n.id=pid(); n.name=p.name+' (สำเนา)'; n.created=n.updated=Date.now(); IDB.get(p.id).then(v=>{ if(v) IDB.put(n.id,v); }); store.projects.push(n); save(); renderProjects(); toast('ทำสำเนาโครงการแล้ว'); return; }
   if(a?.dataset.pa==='del') return ask('ลบโครงการ?', `ลบ “${p.name}” และรายการท่อทั้งหมด ${p.items.length} รายการ — ย้อนกลับไม่ได้`, ()=>{
-    store.projects=store.projects.filter(x=>x.id!==p.id); if(store.cur===p.id){ store.cur=null; items=[]; document.getElementById('pname').textContent=''; } save(); renderProjects(); toast('ลบโครงการแล้ว'); });
+    IDB.del(p.id); store.projects=store.projects.filter(x=>x.id!==p.id); if(store.cur===p.id){ store.cur=null; items=[]; document.getElementById('pname').textContent=''; } save(); renderProjects(); toast('ลบโครงการแล้ว'); });
   if(p.id!==store.cur) openProject(p.id); location.hash='#items';
 });
 
@@ -1880,7 +1953,8 @@ function rnd(v,d){ return v===null||v===undefined||!isFinite(v)?'':+(+v).toFixed
 function reportData(){ renderSummary(); const p=proj(); const {T}=totals();
   const items2=items.map((it,i)=>{ const r=calc(it); return {i:i+1, d:it.d||'', type:(TYPES[it.type].short||it.type), mat:isGI(it)?'สังกะสี GI':'PID t'+(it.t??''), spec:specText(it), qty:num(it.qty), a1:r.area, aT:r.aT, aW:r.aW, vT:r.vT}; });
   return {p,T,items2}; }
-function exportExcel(){ if(!proj()) return toast('ยังไม่ได้เลือกโครงการ'); const {p,T,items2}=reportData();
+function exportExcel(){ if(!proj()) return toast('ยังไม่ได้เลือกโครงการ'); dlBlob(fileBase()+'.xlsx', xlsxBlob()); }
+function xlsxBlob(){ const {p,T,items2}=reportData();
   const info=[{s:2,c:['รายงานคำนวณ PID Duct']},{c:['โครงการ',p.name]},{c:['สถานที่',p.loc||'']},{c:['วันที่',new Date().toLocaleDateString('th-TH')]},{c:['การคำนวณ',(cfg.dim==='in'?'ขนาดภายใน':'ขนาดภายนอก')+' · แผ่น '+cfg.pw+'×'+cfg.pl+' mm']},{c:[]},
     {s:1,c:['ผลรวม','ค่า','หน่วย']},{s:4,c:['จำนวนแผ่น PID (รวมเผื่อ)',T.sheets??'','แผ่น']},{s:4,c:['พื้นที่ผิวรวม',rnd(T.a,3),'m²']},{s:4,c:['พื้นที่รวม + เผื่อเศษ',rnd(T.w,3),'m²']},{s:4,c:['ปริมาตรแผ่นรวม',rnd(T.v,4),'m³']},{s:4,c:['แผ่นสังกะสี GI (รวมเผื่อ)',rnd(T.giW,3),'m²']},{c:[]},
     {s:2,c:['สรุปตามชนิดงาน']},...tblRows('sumTbl',true),];
@@ -1888,7 +1962,7 @@ function exportExcel(){ if(!proj()) return toast('ยังไม่ได้เ
     ...items2.map(x=>({s:4,c:[x.i,x.d,x.type,x.mat,x.spec,x.qty??'',rnd(x.a1,4),rnd(x.aT,4),rnd(x.aW,4),rnd(x.vT,5)]})),
     {s:3,c:['','รวม','','','',items2.reduce((s,x)=>s+(x.qty||0),0),'',rnd(items2.reduce((s,x)=>s+(x.aT||0),0),4),rnd(items2.reduce((s,x)=>s+(x.aW||0),0),4),rnd(items2.reduce((s,x)=>s+(x.vT||0),0),5)]}];
   const raw=itemsTSV().split('\n').slice(1).map((l,i)=>({s:i===0?1:4,c:l.split('\t').map(v=>v!==''&&!isNaN(+v)?+v:v)}));
-  dlBlob(fileBase()+'.xlsx', buildXlsx([{name:'สรุป',rows:info,widths:[46,16,16,16,16,22]},{name:'รายการท่อลม',rows:list,widths:[6,24,14,12,46,8,10,10,10,10]},{name:'ข้อมูลดิบ',rows:raw,widths:Array(30).fill(12)}]));
+  return (buildXlsx([{name:'สรุป',rows:info,widths:[46,16,16,16,16,22]},{name:'รายการท่อลม',rows:list,widths:[6,24,14,12,46,8,10,10,10,10]},{name:'ข้อมูลดิบ',rows:raw,widths:Array(30).fill(12)}]));
   toast('ส่งออก Excel แล้ว'); }
 function figGroups(){ const G=[], idx={}; items.forEach((it,i)=>{ const key=it.type+'|'+JSON.stringify(Object.keys(it).filter(k=>!['id','d','qty','waste'].includes(k)&&it[k]!==''&&it[k]!=null).sort().map(k=>[k,it[k]]));
     if(idx[key]===undefined){ idx[key]=G.length; G.push({it,qty:0,nos:[],ds:[]}); } const g=G[idx[key]]; g.qty+=num(it.qty)||0; g.nos.push(i+1); if(it.d&&!g.ds.includes(it.d)) g.ds.push(it.d); });
@@ -1919,7 +1993,7 @@ function exportPO(){ if(!proj()) return toast('ยังไม่ได้เล
       <span>Type of Work</span><span><i class="${anyP||anyG?'on':''}"></i>Rectangular</span><span><i class="${anyP?'on':''}"></i>PID Duct Thk. ${T0} mm</span><span><i class="${anyR?'on':''}"></i>Round Duct</span>
       <span>Brand</span><span><i></i>BSI.(Singha)</span><span></span><span><i></i>BHP (Bluescope)</span></div>`;
   const ftr=(n,N)=>`<div class="po-rm">Remark :${PO_RM.map(r=>`<p>- ${r}</p>`).join('')}</div>
-    <div class="po-ft"><span>Delivery Date : ............./................./.................</span><span>Inspected by : .....................................</span><span>Page : ${n} / ${N}</span><span>Approved by : .....................................</span></div><div class="po-cr">PID Duct Calc · เว็บเขียนโดย Chitsanupong W.</div>`;
+    <div class="po-ft"><span>Delivery Date : ............./................./.................</span><span>Inspected by : .....................................</span><span>Page : ${n} / ${N}</span><span>Approved by : .....................................</span></div><div class="po-cr">Duct BOQ · เว็บเขียนโดย Chitsanupong W.</div>`;
   pa.innerHTML=pages.map((pg,ix)=>{ const n=ix+1, N=pages.length;
     if(pg.kind==='list') return `<div class="po-page">${hdr(n,'Straight Duct')}<table class="po-t">${head}${pg.rows.map(row).join('')}${Array.from({length:Math.max(0,20-pg.rows.length)},()=>'<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('')}</table>
       <div class="po-body" style="flex:1"><div class="po-tot">${pg.last?`Total ${tTot} Pcs`:''}</div></div>${ftr(n,N)}</div>`;
@@ -2004,12 +2078,12 @@ function exportPDF(){ if(!proj()) return toast('ยังไม่ได้เ�
   document.body.classList.add('printing','sr-mode'); const done=()=>{ document.body.classList.remove('printing','sr-mode'); window.removeEventListener('afterprint',done); };
   window.addEventListener('afterprint',done); const t0=document.title; document.title=fileBase();
   setTimeout(()=>{ try{ window.print(); }catch(e){ toast('เปิดหน้าพิมพ์ไม่ได้'); } document.title=t0; setTimeout(done,500); },60); }
-function saveProjectFile(){ const p=proj(); if(!p) return toast('ยังไม่ได้เลือกโครงการ'); save();
-  dlBlob(fileBase()+'.pidduct.json', new Blob([JSON.stringify({app:'pid-duct-calc',v:1,saved:Date.now(),project:p},null,1)],{type:'application/json'})); toast('บันทึกไฟล์โครงการแล้ว'); }
+async function saveProjectFile(){ const p=proj(); if(!p) return toast('ยังไม่ได้เลือกโครงการ'); save(); const img=p.dwg?await IDB.get(p.id):null;
+  dlBlob(fileBase()+'.ductboq.json', new Blob([JSON.stringify({app:'duct-boq',v:2,saved:Date.now(),project:p,dwgImg:img||undefined},null,1)],{type:'application/json'})); toast('บันทึกไฟล์โครงการแล้ว'); }
 function openProjectFile(){ const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
   inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ try{ const j=JSON.parse(rd.result); const p=j.project||j; if(!p||!Array.isArray(p.items)) throw 0;
       const n=JSON.parse(JSON.stringify(p)); n.id=pid(); n.mm=true; n.created=n.created||Date.now(); n.updated=Date.now(); if(store.projects.some(x=>x.name===n.name)) n.name+=' (นำเข้า)';
-      store.projects.push(n); save(); openProject(n.id); location.hash='#items'; toast('เปิดไฟล์โครงการแล้ว'); }catch(e){ toast('ไฟล์ไม่ถูกต้อง'); } }; rd.readAsText(f); };
+      if(j.dwgImg) IDB.put(n.id,j.dwgImg); store.projects.push(n); save(); openProject(n.id); location.hash='#items'; toast('เปิดไฟล์โครงการแล้ว'); }catch(e){ toast('ไฟล์ไม่ถูกต้อง'); } }; rd.readAsText(f); };
   inp.click(); }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-x]'); if(!b) return; ({excel:exportExcel,pdf:exportPDF,save:saveProjectFile})[b.dataset.x](); });
 document.querySelectorAll('[data-openfile]').forEach(b=>b.onclick=openProjectFile);
@@ -2099,17 +2173,220 @@ function setLang(l){ prefs().lang=l; save(); document.documentElement.lang=l; do
   if(view==='settings') renderSettings();
 }
 
+/* ---------- project actions (header) ---------- */
+document.getElementById('phSave').onclick=()=>{ save(); toast('บันทึกโครงการแล้ว'); };
+document.getElementById('phFile').onclick=()=>saveProjectFile();
+document.getElementById('phDel').onclick=()=>{ const p=proj(); if(!p) return; ask('ลบโครงการ?', `ลบ “${p.name}” รายการท่อ ${p.items.length} รายการ และแบบที่นำเข้า — ย้อนกลับไม่ได้`, ()=>{
+  IDB.del(p.id); store.projects=store.projects.filter(x=>x.id!==p.id); store.cur=null; items=[]; DW.pid=null; document.getElementById('pname').textContent=''; save(); location.hash='#projects'; route(); toast('ลบโครงการแล้ว'); }); };
+
+/* ---------- IndexedDB (drawing images) ---------- */
+const IDB={ mem:{}, db:null,
+  open(){ if(!this.db) this.db=new Promise((res,rej)=>{ try{ const r=indexedDB.open('ductboq',1); r.onupgradeneeded=()=>r.result.createObjectStore('dwg'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }catch(e){ rej(e); } }); return this.db; },
+  async get(k){ if(this.mem[k]) return this.mem[k]; try{ const db=await this.open(); return await new Promise(res=>{ const q=db.transaction('dwg').objectStore('dwg').get(k); q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null); }); }catch(e){ return null; } },
+  async put(k,v){ this.mem[k]=v; try{ const db=await this.open(); await new Promise(res=>{ const tx=db.transaction('dwg','readwrite'); tx.objectStore('dwg').put(v,k); tx.oncomplete=res; tx.onerror=res; }); }catch(e){} },
+  async del(k){ delete this.mem[k]; try{ const db=await this.open(); db.transaction('dwg','readwrite').objectStore('dwg').delete(k); }catch(e){} } };
+
+/* ---------- drawing workspace ---------- */
+const PAPER={A0:[1189,841],A1:[841,594],A2:[594,420],A3:[420,297],A4:[297,210]};
+const DW={pid:null, d:null, z:1, tx:0, ty:0, tool:'sel', chain:null, cal:null, hover:null, undo:[], pdf:null, drag:null, ptrs:new Map()};
+const $d=id=>document.getElementById(id);
+function dwDef(){ return {w:4200,h:2970, img:false, paper:'A3', ori:'L', N:100, pmm:10, ppm:100, src:'grid', pts:[], segs:[]}; }
+function ptTags(id){ const p=proj(); const ps=(p&&p.dwg&&p.dwg.pts||[]).filter(x=>x.item===id); return ps.map(x=>`<span class="ptag">📍${esc(x.no)}</span>`).join(''); }
+function dwCount(){ const p=proj(); const el=$d('ptCount'); if(el) el.textContent=(p&&p.dwg&&p.dwg.pts.length)||''; }
+async function dwShow(){ const p=proj(); if(!p) return; $d('dwPopName').textContent=document.body.classList.contains('pop')?'· '+p.name:''; if(!p.dwg) p.dwg=dwDef(); const d=p.dwg;
+  if(DW.pid!==p.id){ DW.pid=p.id; DW.d=d; DW.undo=[]; DW.chain=null; DW.cal=null; DW.pdf=null; $d('dwPgW').hidden=true;
+    const img=$d('dwImg'); img.removeAttribute('src'); img.hidden=true;
+    if(d.img){ $d('dwBusy').hidden=false; const u=await IDB.get(p.id); $d('dwBusy').hidden=true; if(DW.pid!==p.id) return;
+      if(u){ img.src=u; img.hidden=false; } else { d.img=false; } }
+    dwLayout(); requestAnimationFrame(dwFit); }
+  else { DW.d=d; dwLayout(); }
+  dwTool(DW.tool); dwLists(); }
+function dwLayout(){ const d=DW.d, st=$d('dwSt'), img=$d('dwImg'), svg=$d('dwSvg');
+  st.style.width=d.w+'px'; st.style.height=d.h+'px'; st.classList.toggle('grid',!d.img); img.style.width=d.w+'px'; img.style.height=d.h+'px';
+  svg.setAttribute('width',d.w); svg.setAttribute('height',d.h); svg.setAttribute('viewBox',`0 0 ${d.w} ${d.h}`);
+  $d('dwEmpty').hidden=!!d.img; $d('dwPaper').value=d.paper; $d('dwOri').value=d.ori; $d('dwN').value=d.N; dwScTxt(); dwDraw(); }
+function dwScTxt(){ const d=DW.d; const n=d.pmm?Math.round(d.pmm*1000/d.ppm):null;
+  $d('dwScTxt').textContent=`Scale: ${f2(d.ppm)} px/m${n?` · ≈ 1:${n}`:''}${d.src==='pdf'?` · PDF ${Math.round(d.w/d.pmm)}×${Math.round(d.h/d.pmm)} mm`:d.img?` · กระดาษ ${d.paper}`:''}`; }
+function dwApply(){ const v=$d('dwVp'); $d('dwSt').style.transform=`translate(${DW.tx}px,${DW.ty}px) scale(${DW.z})`; $d('dwZt').textContent=Math.round(DW.z*100)+'%'; dwDraw(); }
+function dwFit(){ const v=$d('dwVp'), d=DW.d; if(!d) return; const W=v.clientWidth||800, H=v.clientHeight||500; DW.z=Math.min((W-24)/d.w,(H-24)/d.h); DW.tx=(W-d.w*DW.z)/2; DW.ty=(H-d.h*DW.z)/2; dwApply(); }
+function dwZoom(k,cx,cy){ const v=$d('dwVp'); if(cx==null){ cx=v.clientWidth/2; cy=v.clientHeight/2; } const z=Math.max(0.02,Math.min(8,DW.z*k)); const r=z/DW.z;
+  DW.tx=cx-(cx-DW.tx)*r; DW.ty=cy-(cy-DW.ty)*r; DW.z=z; dwApply(); }
+function dwW(e){ const r=$d('dwVp').getBoundingClientRect(); return {x:(e.clientX-r.left-DW.tx)/DW.z, y:(e.clientY-r.top-DW.ty)/DW.z, sx:e.clientX-r.left, sy:e.clientY-r.top}; }
+const dwLen=g=>Math.hypot(g.x2-g.x1,g.y2-g.y1)/DW.d.ppm;
+function dwPush(){ DW.undo.push(JSON.stringify({pts:DW.d.pts,segs:DW.d.segs,ppm:DW.d.ppm,N:DW.d.N,pmm:DW.d.pmm})); if(DW.undo.length>60) DW.undo.shift(); }
+function dwCommit(){ save(); dwDraw(); dwLists(); dwCount(); }
+function dwSnap(p,ex){ const r=10/DW.z; let best=null, bd=r; DW.d.segs.forEach((g,i)=>[[g.x1,g.y1],[g.x2,g.y2]].forEach(([x,y])=>{ if(ex&&ex(i)) return; const dd=Math.hypot(x-p.x,y-p.y); if(dd<bd){ bd=dd; best={x,y}; } })); return best||p; }
+function dwOrtho(a,p){ const dx=p.x-a.x, dy=p.y-a.y; return Math.abs(dx)>Math.abs(dy)?{x:p.x,y:a.y}:{x:a.x,y:p.y}; }
+function dwHit(p){ const r=12/DW.z, d=DW.d;
+  for(let i=d.pts.length-1;i>=0;i--){ if(Math.hypot(d.pts[i].x-p.x,d.pts[i].y-p.y)<r*1.2) return {k:'pt',i}; }
+  for(let i=d.segs.length-1;i>=0;i--){ const g=d.segs[i]; if(Math.hypot(g.x1-p.x,g.y1-p.y)<r) return {k:'e',i,e:1}; if(Math.hypot(g.x2-p.x,g.y2-p.y)<r) return {k:'e',i,e:2}; }
+  for(let i=d.segs.length-1;i>=0;i--){ const g=d.segs[i]; const vx=g.x2-g.x1, vy=g.y2-g.y1, L2=vx*vx+vy*vy||1; let t=((p.x-g.x1)*vx+(p.y-g.y1)*vy)/L2; t=Math.max(0,Math.min(1,t));
+    if(Math.hypot(g.x1+t*vx-p.x,g.y1+t*vy-p.y)<r*0.6) return {k:'s',i}; }
+  return null; }
+function dwDraw(){ const d=DW.d; if(!d) return; const z=DW.z, u=1/z, fs=13*u; let o='';
+  d.segs.forEach((g,i)=>{ const L=dwLen(g), mx=(g.x1+g.x2)/2, my=(g.y1+g.y2)/2; let a=Math.atan2(g.y2-g.y1,g.x2-g.x1)*180/Math.PI; if(a>90) a-=180; if(a<-90) a+=180; const hl=DW.sel&&DW.sel.k==='s'&&DW.sel.i===i;
+    o+=`<line x1="${g.x1}" y1="${g.y1}" x2="${g.x2}" y2="${g.y2}" stroke="${hl?'#f08c00':'#e03131'}" stroke-width="${3*u}" stroke-linecap="round"/>`
+     +`<circle cx="${g.x1}" cy="${g.y1}" r="${4*u}" fill="#fff" stroke="#e03131" stroke-width="${1.5*u}"/><circle cx="${g.x2}" cy="${g.y2}" r="${4*u}" fill="#fff" stroke="#e03131" stroke-width="${1.5*u}"/>`
+     +`<text transform="translate(${mx},${my}) rotate(${a})" y="${-6*u}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="#c92a2a" stroke="#fff" stroke-width="${3.5*u}" paint-order="stroke" font-family="Sarabun,sans-serif">S${i+1} · ${f2(L)} m</text>`; });
+  if(DW.chain&&DW.hover){ const a=DW.chain, b=DW.hover; o+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#e03131" stroke-width="${2*u}" stroke-dasharray="${6*u} ${4*u}"/><text x="${b.x+8*u}" y="${b.y-8*u}" font-size="${fs}" font-weight="700" fill="#c92a2a" stroke="#fff" stroke-width="${3.5*u}" paint-order="stroke">${f2(Math.hypot(b.x-a.x,b.y-a.y)/d.ppm)} m</text>`; }
+  if(DW.cal){ const a=DW.cal, b=DW.cal.b||DW.hover; if(b) o+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#7048e8" stroke-width="${2*u}" stroke-dasharray="${5*u} ${3*u}"/>`;
+    o+=`<circle cx="${a.x}" cy="${a.y}" r="${4*u}" fill="#7048e8"/>`; if(DW.cal.b) o+=`<circle cx="${b.x}" cy="${b.y}" r="${4*u}" fill="#7048e8"/>`; }
+  d.pts.forEach((p,i)=>{ const r=11*u, hl=DW.sel&&DW.sel.k==='pt'&&DW.sel.i===i, lab=String(p.no); const w=Math.max(2*r, (lab.length*7+10)*u);
+    o+=`<g><path d="M${p.x} ${p.y} l${-5*u} ${-9*u} h${10*u} z" fill="${hl?'#f08c00':'#1971c2'}"/><rect x="${p.x-w/2}" y="${p.y-9*u-2*r}" width="${w}" height="${2*r}" rx="${r}" fill="${hl?'#f08c00':'#1971c2'}" stroke="#fff" stroke-width="${1.5*u}"/>`
+     +`<text x="${p.x}" y="${p.y-9*u-r+4.2*u}" text-anchor="middle" font-size="${12*u}" font-weight="700" fill="#fff" font-family="Sarabun,sans-serif">${esc(lab)}</text><circle cx="${p.x}" cy="${p.y}" r="${2.2*u}" fill="#1971c2" stroke="#fff" stroke-width="${u}"/></g>`; });
+  $d('dwSvg').innerHTML=o; }
+function dwHint(){ $d('dwHint').textContent={sel:'ลากจุด/ปลายเส้นเพื่อย้าย · ลากพื้นที่ว่างเพื่อเลื่อนแบบ · ล้อเมาส์ = ซูม · กด Delete เพื่อลบที่เลือก',
+  pt:'คลิกบนแบบเพื่อวาง Point No. (เลขรันอัตโนมัติ แก้ชื่อได้ในตารางด้านล่าง)', seg:'คลิกจุดเริ่ม แล้วคลิกต่อเนื่องเพื่อวาดเส้น · Shift = ล็อกแนวตั้ง/นอน · ดับเบิลคลิก/Esc/คลิกขวา = จบเส้น',
+  cal:'คลิก 2 จุดบนระยะที่ทราบความยาวจริง (เช่น เส้นกริด/ระยะในแบบ) แล้วกรอกความยาว'}[DW.tool]; }
+function dwTool(t){ DW.tool=t; DW.chain=null; DW.cal=null; document.querySelectorAll('[data-dt]').forEach(b=>b.classList.toggle('on',b.dataset.dt===t)); $d('dwVp').classList.toggle('tool',t!=='sel'); dwHint(); dwDraw(); }
+function askNum(title,label,val,cb){ const m=$d('nModal'); $d('nTitle').textContent=title; $d('nLab').textContent=label; const i=$d('nVal'); i.value=val??''; m.classList.add('on'); setTimeout(()=>{ i.focus(); i.select(); },50);
+  $d('nNo').onclick=()=>{ m.classList.remove('on'); cb(null); }; $d('nForm').onsubmit=e=>{ e.preventDefault(); const v=parseFloat(i.value); if(!(v>0)) return i.focus(); m.classList.remove('on'); cb(v); }; }
+function dwLists(){ const d=DW.d; if(!d) return;
+  const opts=(sel)=>`<option value="">— ไม่ระบุ —</option>`+items.map((it,i)=>`<option value="${it.id}" ${it.id===sel?'selected':''}>${i+1}. ${esc(TYPES[it.type].short||it.type)} ${esc(specText(it)).slice(0,40)}</option>`).join('');
+  $d('dwPts').innerHTML=d.pts.length?`<thead><tr><th>Point No.</th><th>รายการท่อ</th><th>หมายเหตุ</th><th></th></tr></thead><tbody>`+d.pts.map((p,i)=>`<tr data-pi="${i}" class="${DW.sel&&DW.sel.k==='pt'&&DW.sel.i===i?'hl':''}"><td><input class="pno" data-pf="no" value="${esc(p.no)}"></td><td><select data-pf="item">${opts(p.item)}</select></td><td><input data-pf="note" value="${esc(p.note||'')}" placeholder="—"></td><td><button class="icon" data-pg="${i}" title="ไปที่จุด">⌖</button><button class="icon danger" data-pdel="${i}" title="ลบ">✕</button></td></tr>`).join('')+'</tbody>'
+    :`<tbody><tr><td class="hint2" style="padding:12px">ยังไม่มี Point — เลือกเครื่องมือ “📍 ระบุ Point No.” แล้วคลิกบนแบบ</td></tr></tbody>`;
+  const tot=d.segs.reduce((a,g)=>a+dwLen(g),0);
+  $d('dwSegs').innerHTML=d.segs.length?`<thead><tr><th>No.</th><th class="num">ยาว (m)</th><th class="num">ยาว (mm)</th><th></th></tr></thead><tbody>`+d.segs.map((g,i)=>{ const L=dwLen(g); return `<tr data-si="${i}" class="${DW.sel&&DW.sel.k==='s'&&DW.sel.i===i?'hl':''}"><td><b>S${i+1}</b></td><td class="num">${f2(L)}</td><td class="num">${Math.round(L*1000).toLocaleString()}</td><td style="white-space:nowrap"><button class="btn sm" data-s2i="${i}" title="เปิดฟอร์มท่อตรงพร้อมความยาวนี้">→ ท่อตรง</button><button class="icon danger" data-sdel="${i}" title="ลบ">✕</button></td></tr>`; }).join('')+`</tbody><tfoot><tr><th>รวม</th><th class="num">${f2(tot)}</th><th class="num">${Math.round(tot*1000).toLocaleString()}</th><th></th></tr></tfoot>`
+    :`<tbody><tr><td class="hint2" style="padding:12px">ยังไม่มี Segment — เลือก “วาด Segment” แล้วคลิกตามแนวท่อ (ตั้งสเกลก่อน)</td></tr></tbody>`;
+  $d('dwPtN').textContent=d.pts.length?`${d.pts.length} จุด`:''; $d('dwSgN').textContent=d.segs.length?`${d.segs.length} เส้น · รวม ${f2(tot)} m`:''; }
+function dwNextNo(){ let m=0; DW.d.pts.forEach(p=>{ const n=parseInt(String(p.no).replace(/\D+/g,'')); if(n>m) m=n; }); return 'P'+(m+1); }
+
+/* pointer events */
+(function(){ const v=$d('dwVp');
+  v.addEventListener('wheel',e=>{ e.preventDefault(); const w=dwW(e); dwZoom(e.deltaY<0?1.15:1/1.15,w.sx,w.sy); },{passive:false});
+  v.addEventListener('contextmenu',e=>{ e.preventDefault(); if(DW.chain){ DW.chain=null; dwDraw(); } });
+  v.addEventListener('dblclick',e=>{ if(DW.tool==='seg'){ DW.chain=null; dwDraw(); } });
+  v.addEventListener('pointerdown',e=>{ if(!DW.d) return; v.setPointerCapture(e.pointerId); DW.ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(DW.ptrs.size===2){ const [a,b]=[...DW.ptrs.values()]; DW.drag={k:'pinch', d0:Math.hypot(a.x-b.x,a.y-b.y), z0:DW.z, tx0:DW.tx, ty0:DW.ty, cx:(a.x+b.x)/2, cy:(a.y+b.y)/2}; return; }
+    const w=dwW(e); if(e.button===2) return;
+    if(e.button===1||DW.tool==='sel'||false){
+      const h=e.button===1?null:dwHit(w);
+      if(h){ DW.sel=h; dwPush(); DW.drag={k:h.k,i:h.i,e:h.e,x:w.x,y:w.y,moved:false, pairs:h.k==='e'?dwPairs(h):null}; dwDraw(); dwLists(); return; }
+      DW.sel=null; DW.drag={k:'pan',sx:e.clientX,sy:e.clientY,tx:DW.tx,ty:DW.ty}; v.classList.add('pan'); dwDraw(); dwLists(); return; }
+    DW.drag={k:'tap',sx:e.clientX,sy:e.clientY,tx:DW.tx,ty:DW.ty};
+  });
+  v.addEventListener('pointermove',e=>{ if(DW.ptrs.has(e.pointerId)) DW.ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); const w=dwW(e), g=DW.drag;
+    if(g&&g.k==='pinch'&&DW.ptrs.size===2){ const [a,b]=[...DW.ptrs.values()], r=$d('dwVp').getBoundingClientRect(); const z=Math.max(0.02,Math.min(8,g.z0*Math.hypot(a.x-b.x,a.y-b.y)/g.d0)); const cx=g.cx-r.left, cy=g.cy-r.top, ncx=(a.x+b.x)/2-r.left, ncy=(a.y+b.y)/2-r.top;
+      DW.z=z; DW.tx=ncx-(cx-g.tx0)*z/g.z0; DW.ty=ncy-(cy-g.ty0)*z/g.z0; dwApply(); return; }
+    if(g&&(g.k==='pan'||g.k==='tap')){ const dx=e.clientX-g.sx, dy=e.clientY-g.sy; if(g.k==='tap'&&Math.hypot(dx,dy)>6){ g.k='pan'; v.classList.add('pan'); } if(g.k==='pan'){ DW.tx=g.tx+dx; DW.ty=g.ty+dy; dwApply(); } return; }
+    const d=DW.d; if(!d) return;
+    if(g&&g.k==='pt'){ d.pts[g.i].x=w.x; d.pts[g.i].y=w.y; g.moved=true; dwDraw(); return; }
+    if(g&&g.k==='e'){ const p=dwSnap(w,i=>i===g.i); g.pairs.forEach(([i,en])=>{ const s=d.segs[i]; s['x'+en]=p.x; s['y'+en]=p.y; }); g.moved=true; dwDraw(); return; }
+    if(g&&g.k==='s'){ const dx=w.x-g.x, dy=w.y-g.y; const s=d.segs[g.i]; s.x1+=dx; s.y1+=dy; s.x2+=dx; s.y2+=dy; g.x=w.x; g.y=w.y; g.moved=true; dwDraw(); return; }
+    if(DW.tool==='seg'&&DW.chain){ let p=dwSnap(w); if(e.shiftKey) p=dwOrtho(DW.chain,p); DW.hover=p; dwDraw(); }
+    else if(DW.tool==='cal'&&DW.cal&&!DW.cal.b){ DW.hover=e.shiftKey?dwOrtho(DW.cal,w):w; dwDraw(); }
+  });
+  const up=e=>{ DW.ptrs.delete(e.pointerId); const g=DW.drag; v.classList.remove('pan');
+    if(!g){ return; } if(g.k==='pinch'){ if(DW.ptrs.size===0) DW.drag=null; return; } DW.drag=null;
+    if(['pt','e','s'].includes(g.k)){ if(g.moved) dwCommit(); else DW.undo.pop(); return; }
+    if(g.k!=='tap') return; const w=dwW(e), d=DW.d;
+    if(DW.tool==='pt'){ dwPush(); d.pts.push({no:dwNextNo(),x:w.x,y:w.y,note:'',item:null}); DW.sel={k:'pt',i:d.pts.length-1}; dwCommit(); return; }
+    if(DW.tool==='seg'){ let p=dwSnap(w); if(DW.chain){ if(e.shiftKey) p=dwOrtho(DW.chain,p); if(Math.hypot(p.x-DW.chain.x,p.y-DW.chain.y)<2/DW.z) return; dwPush(); d.segs.push({x1:DW.chain.x,y1:DW.chain.y,x2:p.x,y2:p.y}); DW.chain=p; dwCommit(); } else { DW.chain=p; DW.hover=p; dwDraw(); } return; }
+    if(DW.tool==='cal'){ if(!DW.cal){ DW.cal={x:w.x,y:w.y}; dwDraw(); return; } const b=e.shiftKey?dwOrtho(DW.cal,w):w; DW.cal.b=b; dwDraw(); const px=Math.hypot(b.x-DW.cal.x,b.y-DW.cal.y);
+      askNum('Calibrate Scale','ความยาวจริงของระยะที่เลือก (m)', '', val=>{ if(val&&px>0){ dwPush(); d.ppm=px/val; if(d.pmm) d.N=Math.round(d.pmm*1000/d.ppm); dwLayout(); dwLists(); save(); toast(`ตั้งสเกลแล้ว ${f2(d.ppm)} px/m`); } DW.cal=null; dwDraw(); }); }
+  };
+  v.addEventListener('pointerup',up); v.addEventListener('pointercancel',e=>{ DW.ptrs.delete(e.pointerId); DW.drag=null; });
+})();
+function dwPairs(h){ const d=DW.d, g=d.segs[h.i], x=g['x'+h.e], y=g['y'+h.e], r=0.5; const out=[];
+  d.segs.forEach((s,i)=>[1,2].forEach(en=>{ if(Math.abs(s['x'+en]-x)<r&&Math.abs(s['y'+en]-y)<r) out.push([i,en]); })); return out; }
+document.addEventListener('keydown',e=>{ if(view!=='drawing'||!DW.d) return; if(e.target.closest('input,select,textarea')) return;
+  if(e.key==='Escape'){ DW.chain=null; DW.cal=null; dwDraw(); }
+  if((e.key==='Delete'||e.key==='Backspace')&&DW.sel){ dwPush(); if(DW.sel.k==='pt') DW.d.pts.splice(DW.sel.i,1); else DW.d.segs.splice(DW.sel.i,1); DW.sel=null; dwCommit(); renderList(); }
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){ e.preventDefault(); dwUndo(); } });
+function dwUndo(){ const s=DW.undo.pop(); if(!s) return toast('ไม่มีขั้นตอนให้ย้อน'); Object.assign(DW.d,JSON.parse(s)); DW.sel=null; dwScTxt(); dwCommit(); renderList(); }
+document.getElementById('dwTools').addEventListener('click',e=>{ const b=e.target.closest('[data-dt]'); if(b) dwTool(b.dataset.dt); });
+$d('dwZi').onclick=()=>dwZoom(1.25); $d('dwZo').onclick=()=>dwZoom(1/1.25); $d('dwFit').onclick=dwFit; $d('dwUndo').onclick=dwUndo;
+$d('dwClr').onclick=()=>{ if(!DW.d) return; ask('ลบ Point และ Segment ทั้งหมด?','แบบพื้นหลังและสเกลยังอยู่ (กด Undo เพื่อย้อนได้)',()=>{ dwPush(); DW.d.pts=[]; DW.d.segs=[]; DW.sel=null; dwCommit(); renderList(); }); };
+$d('dwBg').onclick=()=>{ const p=proj(); if(!p||!DW.d.img) return toast('ยังไม่มีแบบพื้นหลัง'); ask('ลบแบบพื้นหลัง?','Point และ Segment ยังอยู่ — สเกลจะคงค่าเดิม',()=>{ IDB.del(p.id); DW.d.img=false; DW.d.src='grid'; DW.pdf=null; $d('dwPgW').hidden=true; const im=$d('dwImg'); im.removeAttribute('src'); im.hidden=true; save(); dwLayout(); }); };
+$d('dwApply').onclick=()=>{ const d=DW.d; if(!d) return; const N=+$d('dwN').value; if(!(N>0)) return toast('กรอกมาตราส่วน');
+  d.paper=$d('dwPaper').value; d.ori=$d('dwOri').value; d.N=N;
+  if(d.src!=='pdf'){ const P=PAPER[d.paper]; const pw=d.ori==='L'?P[0]:P[1]; d.pmm=d.w/pw; }
+  dwPush(); d.ppm=d.pmm*1000/N; save(); dwScTxt(); dwDraw(); dwLists(); toast(`ใช้สเกล 1:${N} — ${f2(d.ppm)} px/m`); };
+['dwPaper','dwOri'].forEach(id=>$d(id).onchange=()=>{ if(DW.d){ DW.d.paper=$d('dwPaper').value; DW.d.ori=$d('dwOri').value; } });
+$d('dwPts').addEventListener('input',e=>{ const t=e.target, tr=t.closest('[data-pi]'); if(!tr) return; const p=DW.d.pts[+tr.dataset.pi]; const k=t.dataset.pf;
+  p[k]= k==='item' ? (t.value?+t.value:null) : t.value; save(); dwDraw(); if(k!=='note') renderList(); dwCount(); });
+$d('dwPts').addEventListener('click',e=>{ const g=e.target.closest('[data-pg]'), x=e.target.closest('[data-pdel]');
+  if(x){ dwPush(); DW.d.pts.splice(+x.dataset.pdel,1); DW.sel=null; dwCommit(); renderList(); return; }
+  if(g){ const p=DW.d.pts[+g.dataset.pg]; DW.sel={k:'pt',i:+g.dataset.pg}; dwCenter(p.x,p.y); dwLists(); } });
+$d('dwSegs').addEventListener('click',e=>{ const x=e.target.closest('[data-sdel]'), s=e.target.closest('[data-s2i]'), tr=e.target.closest('[data-si]');
+  if(x){ dwPush(); DW.d.segs.splice(+x.dataset.sdel,1); DW.sel=null; dwCommit(); return; }
+  if(s){ const i=+s.dataset.s2i, L=Math.round(dwLen(DW.d.segs[i])*1000); editingId=null; draft=newDraft(draft); draft.type='ท่อตรง'; draft.L=L; draft.d=draft.d||`S${i+1}`; location.hash='#items'; setTimeout(()=>{ renderForm(true); toast(`ความยาว ${L.toLocaleString()} mm — กรอก W×H แล้วกดเพิ่มรายการ`); },60); return; }
+  if(tr){ const g=DW.d.segs[+tr.dataset.si]; DW.sel={k:'s',i:+tr.dataset.si}; dwCenter((g.x1+g.x2)/2,(g.y1+g.y2)/2); dwLists(); } });
+function dwCenter(x,y){ const v=$d('dwVp'); if(DW.z<0.5) DW.z=Math.min(1,DW.z*3); DW.tx=v.clientWidth/2-x*DW.z; DW.ty=v.clientHeight/2-y*DW.z; dwApply(); }
+
+/* upload */
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+function loadScript(u){ return new Promise((res,rej)=>{ const a=document.createElement('script'); a.src=u; a.onload=res; a.onerror=()=>rej(new Error('load '+u)); document.head.appendChild(a); }); }
+async function pdfLib(){ if(!window.pdfjsLib){ await loadScript(PDFJS+'pdf.min.js'); } if(!window.pdfjsWorker){ await loadScript(PDFJS+'pdf.worker.min.js'); } pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.js'; return pdfjsLib; }
+async function dwRenderPdfPage(n){ const pg=await DW.pdf.getPage(n); const vp1=pg.getViewport({scale:1}); const long=Math.max(vp1.width,vp1.height); const sc=Math.min(6, 5200/long);
+  const vp=pg.getViewport({scale:sc}); const c=document.createElement('canvas'); c.width=Math.round(vp.width); c.height=Math.round(vp.height); const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height);
+  await pg.render({canvasContext:x, viewport:vp}).promise; const wmm=vp1.width*25.4/72, hmm=vp1.height*25.4/72;
+  return {url:c.toDataURL('image/jpeg',0.85), w:c.width, h:c.height, pmm:c.width/wmm, wmm, hmm}; }
+function paperOf(wmm,hmm){ const L=Math.max(wmm,hmm); let best='A3', bd=1e9; for(const k in PAPER){ const dd=Math.abs(PAPER[k][0]-L); if(dd<bd){ bd=dd; best=k; } } return {paper:best, ori:wmm>=hmm?'L':'P'}; }
+async function dwSetImage(r, src){ const p=proj(), d=DW.d; const keep=d.pts.length||d.segs.length; const sx=keep?r.w/d.w:1, sy=keep?r.h/d.h:1;
+  d.pts.forEach(q=>{ q.x*=sx; q.y*=sy; }); d.segs.forEach(g=>{ g.x1*=sx; g.x2*=sx; g.y1*=sy; g.y2*=sy; });
+  d.w=r.w; d.h=r.h; d.img=true; d.src=src;
+  if(src==='pdf'){ d.pmm=r.pmm; const q=paperOf(r.wmm,r.hmm); d.paper=q.paper; d.ori=q.ori; }
+  else { const q=d.w>=d.h?'L':'P'; d.ori=q; const P=PAPER[d.paper]; d.pmm=d.w/(q==='L'?P[0]:P[1]); }
+  d.ppm=d.pmm*1000/d.N; await IDB.put(p.id,r.url); const im=$d('dwImg'); im.src=r.url; im.hidden=false; save(); dwLayout(); dwFit(); dwLists(); }
+$d('dwUp').onclick=()=>{ if(!proj()) return; const inp=document.createElement('input'); inp.type='file'; inp.accept='.pdf,application/pdf,image/png,image/jpeg';
+  inp.onchange=async()=>{ const f=inp.files[0]; if(!f) return; $d('dwBusy').hidden=false;
+    try{ if(/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name)){ const lib=await pdfLib(); const buf=new Uint8Array(await f.arrayBuffer()); DW.pdf=await lib.getDocument({data:buf}).promise;
+        const n=DW.pdf.numPages; $d('dwPg').innerHTML=Array.from({length:n},(_,i)=>`<option value="${i+1}">${i+1} / ${n}</option>`).join(''); $d('dwPgW').hidden=n<2;
+        const r=await dwRenderPdfPage(1); await dwSetImage(r,'pdf'); toast(`นำเข้า PDF แล้ว — ${DW.d.paper} · สเกล 1:${DW.d.N} (แก้ได้แล้วกด “ใช้สเกลกระดาษ”)`); }
+      else { const url=await new Promise((res,rej)=>{ const rd=new FileReader(); rd.onload=()=>res(rd.result); rd.onerror=rej; rd.readAsDataURL(f); });
+        const im=await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url; });
+        let w=im.naturalWidth, h=im.naturalHeight, u=url; const M=6000; if(Math.max(w,h)>M){ const k=M/Math.max(w,h); w=Math.round(w*k); h=Math.round(h*k); const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(im,0,0,w,h); u=c.toDataURL('image/jpeg',0.88); }
+        await dwSetImage({url:u,w,h},'img'); toast(`นำเข้ารูปแล้ว — เลือกกระดาษ/มาตราส่วนแล้วกด “ใช้สเกลกระดาษ” หรือใช้ Calibrate`); } }
+    catch(err){ console.error(err); toast('เปิดไฟล์ไม่ได้'+(/load/.test(err&&err.message)?' (โหลดตัวอ่าน PDF ไม่ได้ — ต้องต่ออินเทอร์เน็ต)':'')); }
+    $d('dwBusy').hidden=true; };
+  inp.click(); };
+$d('dwPg').onchange=async()=>{ if(!DW.pdf) return; $d('dwBusy').hidden=false; try{ await dwSetImage(await dwRenderPdfPage(+$d('dwPg').value),'pdf'); }catch(e){ toast('เปิดหน้าไม่ได้'); } $d('dwBusy').hidden=true; };
+window.addEventListener('resize',()=>{ if(view==='drawing') dwApply(); });
+$d('dwPop').onclick=()=>{ save(); let w=null; try{ w=window.open(location.href.split('#')[0]+'#drawing-pop','ductboq_dw','popup=yes,width=1400,height=900'); }catch(e){}
+  if(w){ toast('เปิดหน้าต่างใหม่แล้ว — ลากไปจออีกจอได้ ข้อมูลซิงก์กันอัตโนมัติ'); } else { dwMaxi(true); toast('เบราว์เซอร์นี้เปิดหน้าต่างใหม่ไม่ได้ — ใช้โหมดเต็มจอแทน'); } };
+function dwMaxi(on){ const v=$d('v-drawing'); on=on??!v.classList.contains('max'); v.classList.toggle('max',on); $d('dwMax').textContent=on?'✕ ออกจากเต็มจอ':'⛶ เต็มจอ';
+  if(on){ try{ document.documentElement.requestFullscreen?.().catch(()=>{}); }catch(e){} } else { try{ document.fullscreenElement&&document.exitFullscreen(); }catch(e){} } setTimeout(dwFit,120); }
+$d('dwMax').onclick=()=>dwMaxi();
+document.addEventListener('fullscreenchange',()=>{ if(!document.fullscreenElement&&$d('v-drawing').classList.contains('max')) dwMaxi(false); });
+/* sync between windows */
+window.addEventListener('storage',e=>{ if(e.key!==PKEY||!e.newValue) return; try{ const n=JSON.parse(e.newValue); const cur=store.cur; store=n; if(cur&&store.projects.some(p=>p.id===cur)) store.cur=cur; const p=proj(); if(!p) return route();
+    const oldD=DW.d; cfg=Object.assign({},CFG0,p.cfg); items=p.items; renderList();
+    if(view==='drawing'){ const d=p.dwg; if(!d) return; if(!oldD||oldD.img!==d.img||oldD.w!==d.w||oldD.h!==d.h){ DW.pid=null; IDB.mem={}; dwShow(); } else { DW.d=d; dwScTxt(); dwDraw(); dwLists(); } }
+    dwCount(); }catch(err){} });
+
+
+/* ---------- Submit -> LINE ---------- */
+function lineSummary(){ const p=proj(), T=totals().T, d=new Date();
+  const L=[`📋 Duct BOQ — ${p.name}`, p.loc?`📍 ${p.loc}`:null, `🗓 ${d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})} ${d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}`, '',
+    `รายการ: ${items.length} รายการ / ${items.reduce((a,it)=>a+(num(it.qty)||0),0)} ชิ้น`, `พื้นที่ PID รวม: ${f2(T.a)} m²`, `รวมเผื่อเศษ: ${f2(T.w)} m²`, `แผ่น PID ${cfg.pw}×${cfg.pl} mm: ${T.sheets??'–'} แผ่น`, ''];
+  const g={}; items.forEach(it=>{ const k=(TYPES[it.type].short||it.type)+(isGI(it)?' (GI)':''); g[k]=(g[k]||0)+(num(it.qty)||0); });
+  L.push('ชนิดงาน:'); Object.entries(g).forEach(([k,n])=>L.push(`• ${k} × ${n}`));
+  L.push('', 'ส่งจาก Duct BOQ'); return L.filter(x=>x!==null).join('\n'); }
+function lineFile(){ return new File([xlsxBlob()], fileBase()+'.xlsx', {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}); }
+function updShare(){ const p=proj(), b=document.getElementById('shareBtn'), s=document.getElementById('lineBtn'); if(!b||!s) return; b.hidden=!(p&&p.submitted); s.textContent=p&&p.submitted?'✓ Submit อีกครั้ง':'✓ Submit'; s.title=p&&p.submitted?'Submit ล่าสุด '+new Date(p.submitted).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):''; }
+document.getElementById('lineBtn').onclick=()=>{ const p=proj(); if(!p) return toast('ยังไม่ได้เลือกโครงการ'); if(!items.length) return toast('ยังไม่มีรายการ');
+  p.submitted=Date.now(); save(); updShare(); toast('Submit แล้ว — กด “แชร์” เพื่อส่งต่อได้'); };
+document.getElementById('shareBtn').onclick=()=>{ const p=proj(); if(!p||!p.submitted) return; $d('lnSub').textContent='✓ Submit แล้ว '+new Date(p.submitted).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}); const tx=lineSummary(); $d('lnText').value=tx; const upd=()=>{ $d('lnLink').href='https://line.me/R/share?text='+encodeURIComponent($d('lnText').value); }; upd(); $d('lnText').oninput=upd;
+  let can=false; try{ can=!!(navigator.canShare&&navigator.canShare({files:[lineFile()]})); }catch(e){}
+  $d('lnShare').hidden=!can; $d('lnNote').textContent=can?'กด “แชร์ไฟล์” แล้วเลือกแอป LINE → เลือกแชท/กลุ่ม':'อุปกรณ์/เบราว์เซอร์นี้แชร์ไฟล์ตรงไม่ได้ — ดาวน์โหลด Excel/PDF แล้วแนบใน LINE หรือส่งข้อความสรุปผ่านปุ่ม “เปิด LINE”';
+  $d('lnModal').classList.add('on'); };
+$d('lnClose').onclick=()=>$d('lnModal').classList.remove('on');
+$d('lnShare').onclick=async()=>{ try{ await navigator.share({files:[lineFile()], title:'Duct BOQ — '+proj().name, text:$d('lnText').value}); toast('ส่งแล้ว'); $d('lnModal').classList.remove('on'); }
+  catch(e){ if(e&&e.name==='AbortError') return; try{ await navigator.share({title:'Duct BOQ', text:$d('lnText').value}); }catch(e2){ toast('แชร์ไม่ได้ — ใช้ดาวน์โหลดแทน'); } } };
+$d('lnXlsx').onclick=()=>exportExcel(); $d('lnPdf').onclick=()=>{ $d('lnModal').classList.remove('on'); exportPDF(); }; $d('lnCopy').onclick=()=>copyText($d('lnText').value,'คัดลอกข้อความแล้ว — วางในแชท LINE ได้เลย');
+
 /* routing */
 let view='items';
-function route(){ const h=location.hash.slice(1); view = ['summary','items','projects','history','settings'].includes(h) ? h : (store.cur?'items':'projects');
-  if((view==='items'||view==='summary') && !store.cur){ view='projects'; }
+function route(){ const h=location.hash.slice(1); const pop=h==='drawing-pop'; document.body.classList.toggle('pop',pop); view = pop?'drawing':['summary','items','drawing','projects','history','settings'].includes(h) ? h : (store.cur?'items':'projects');
+  if((view==='items'||view==='summary'||view==='drawing') && !store.cur){ view='projects'; }
   const glob = view==='projects'||view==='history'||view==='settings';
   document.getElementById('v-history').hidden = view!=='history'; document.getElementById('v-settings').hidden = view!=='settings';
   if(view==='history') renderHistory(); if(view==='settings') renderSettings();
-  document.getElementById('v-items').hidden = view!=='items'; document.getElementById('v-summary').hidden = view!=='summary';
+  document.getElementById('v-items').hidden = view!=='items'; document.getElementById('v-summary').hidden = view!=='summary'; document.getElementById('v-drawing').hidden = view!=='drawing'; if(view==='drawing') dwShow();
   document.getElementById('v-projects').hidden = view!=='projects';  document.getElementById('phead').hidden = glob;
   updateHead();
-  document.querySelector('.dock').hidden = glob; document.getElementById('histCount').textContent = (store.history||[]).length||'';
+  document.querySelector('.dock').hidden = glob||view==='drawing'; dwCount(); document.getElementById('histCount').textContent = (store.history||[]).length||'';
   if(view==='projects') renderProjects();
   document.querySelectorAll('.tabs a, .snav a').forEach(a=>a.classList.toggle('on',a.dataset.v===view));
   document.getElementById('sProj').hidden = !store.cur; document.getElementById('projCount').textContent = store.projects.length||''; document.getElementById('itemCount').textContent = items.length||'';
