@@ -477,6 +477,7 @@ body.dv-tab .tcard svg.ic3{width:64px;height:36px}
 .dw-h{display:flex;align-items:center;gap:8px;margin-bottom:10px} .dw-h b{font-size:14px;letter-spacing:.04em;color:#495057}
 .dw-tb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
 .dw-tb .btn.on{background:#1971c2;border-color:#1971c2;color:#fff}
+.dw-col{display:inline-flex;gap:3px;padding:3px 5px;border:1px solid var(--line);border-radius:8px;background:#fff} .dw-col i{width:18px;height:18px;border-radius:5px;cursor:pointer;border:2px solid #fff;box-shadow:0 0 0 1px #ced4da} .dw-col i.on{box-shadow:0 0 0 2px #212529}
 .dw-z{min-width:52px;text-align:center;color:var(--muted);font-size:14px} .dw-sep{width:1px;height:24px;background:var(--line);margin:0 4px}
 .dw-l{display:inline-flex;align-items:center;gap:5px;font-size:14px;color:#495057} .dw-l select,.dw-l input{border:1px solid var(--line);border-radius:8px;padding:4px 6px;font:inherit;background:#fff} .dw-l input{width:78px}
 .dw-vp{position:relative;height:68vh;min-height:360px;border:1px solid #dbe4f0;border-radius:10px;overflow:hidden;background:#f8fafc;touch-action:none;user-select:none;cursor:grab}
@@ -484,7 +485,7 @@ body.dv-tab .tcard svg.ic3{width:64px;height:36px}
 #dwSt{position:absolute;left:0;top:0;transform-origin:0 0;background:#fff;box-shadow:0 0 0 1px #cfd8e3}
 #dwSt.grid{background-color:#fff;background-image:linear-gradient(#eef2f7 1px,transparent 1px),linear-gradient(90deg,#eef2f7 1px,transparent 1px);background-size:50px 50px}
 #dwImg{position:absolute;left:0;top:0;display:block;pointer-events:none} #dwSvg{position:absolute;left:0;top:0;overflow:visible}
-.dw-empty{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:rgba(255,255,255,.92);border:1px dashed #adb5bd;border-radius:10px;padding:6px 14px;font-size:14px;color:#495057;pointer-events:none}
+.dw-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none} .dw-ec{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(255,255,255,.95);border:1.5px dashed #9fb3a6;border-radius:16px;padding:22px 34px;color:#495057;font-size:14px;box-shadow:0 6px 24px rgba(16,24,40,.06)} .dw-ec b{font-size:16px;color:#212529} .dw-ec .btn{margin-top:6px;height:40px;padding:0 20px} .dw-ec small{color:var(--muted)} .dw-vp.drop{outline:3px dashed #15703c;outline-offset:-6px}
 .dw-busy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.7);font-weight:600}
 .dw-hint{font-size:13px;color:var(--muted);margin-top:6px;min-height:18px}
 .dw-lists{display:grid;grid-template-columns:1fr 1fr;gap:14px} @media(max-width:900px){.dw-lists{grid-template-columns:1fr}}
@@ -583,8 +584,8 @@ body.dv-tab .tcard svg.ic3{width:64px;height:36px}
    <div class="dw-card">
     <div class="dw-h"><b>SCHEMATIC WORKSPACE</b><span class="hint2" id="dwPopName"></span><span class="spacer"></span><span class="hint2" id="dwScTxt"></span><button class="btn sm dw-pophide" id="dwPop" title="เปิดพื้นที่วาดในหน้าต่างใหม่ (ลากไปจออีกจอได้)">⧉ แยกหน้าต่าง</button><button class="btn sm" id="dwMax" title="ขยายเต็มจอ">⛶ เต็มจอ</button></div>
     <div class="dw-tb" id="dwTools">
-      <button class="btn sm" data-dt="sel">เลือก (Select)</button><button class="btn sm" data-dt="pt">📍 ระบุ Point No.</button><button class="btn sm" data-dt="seg">วาด Segment</button><button class="btn sm" data-dt="cal">Calibrate Scale</button>
-      <button class="btn sm" id="dwUp">อัปโหลดแบบ (PDF / PNG / JPG)</button><button class="btn sm" id="dwBg">ลบพื้นหลัง</button><button class="btn sm" id="dwUndo">↶ Undo</button><button class="btn sm danger" id="dwClr">ลบทั้งหมด</button>
+      <button class="btn sm" data-dt="sel">เลือก (Select)</button><button class="btn sm" data-dt="pt">📍 ระบุ Point No.</button><button class="btn sm" data-dt="seg">วาด Segment</button><button class="btn sm" data-dt="dim">📏 วัดระยะ</button><button class="btn sm" data-dt="poly">⬠ Polygon Highlight</button><span class="dw-col" id="dwCol"></span><button class="btn sm" data-dt="cal">Calibrate Scale</button>
+      <button class="btn sm" id="dwUp" hidden>เปลี่ยนแบบ</button><button class="btn sm" id="dwBg">ลบพื้นหลัง</button><button class="btn sm" id="dwDelSel" disabled>🗑 ลบที่เลือก</button><button class="btn sm" id="dwUndo">↶ Undo</button><button class="btn sm danger" id="dwClr">ลบทั้งหมด</button>
     </div>
     <div class="dw-tb">
       <button class="btn sm" id="dwZo">−</button><span class="dw-z" id="dwZt">100%</span><button class="btn sm" id="dwZi">+</button><button class="btn sm" id="dwFit">Fit</button>
@@ -596,7 +597,8 @@ body.dv-tab .tcard svg.ic3{width:64px;height:36px}
       <label class="dw-l" id="dwPgW" hidden>หน้า PDF <select id="dwPg"></select></label>
     </div>
     <div class="dw-vp" id="dwVp"><div id="dwSt"><img id="dwImg" alt="" draggable="false"><svg id="dwSvg" xmlns="http://www.w3.org/2000/svg"></svg></div>
-      <div class="dw-empty" id="dwEmpty">ยังไม่มีแบบ — กด “อัปโหลดแบบ” (PDF / PNG / JPG) หรือวาดบนกริดได้เลย</div>
+      <div class="dw-empty" id="dwEmpty"><div class="dw-ec"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#15703c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15l3-3 3 3"/></svg>
+  <b>ยังไม่มีแบบ</b><span>ลากไฟล์มาวาง หรือกดปุ่มด้านล่าง</span><button class="btn primary" id="dwUp2">อัปโหลดแบบ (PDF / PNG / JPG)</button><small>หรือวาดบนกริดได้เลย</small></div></div>
       <div class="dw-busy" id="dwBusy" hidden>กำลังโหลดแบบ…</div></div>
     <div class="dw-hint" id="dwHint"></div>
    </div>
@@ -2190,10 +2192,10 @@ const IDB={ mem:{}, db:null,
 const PAPER={A0:[1189,841],A1:[841,594],A2:[594,420],A3:[420,297],A4:[297,210]};
 const DW={pid:null, d:null, z:1, tx:0, ty:0, tool:'sel', chain:null, cal:null, hover:null, undo:[], pdf:null, drag:null, ptrs:new Map()};
 const $d=id=>document.getElementById(id);
-function dwDef(){ return {w:4200,h:2970, img:false, paper:'A3', ori:'L', N:100, pmm:10, ppm:100, src:'grid', pts:[], segs:[]}; }
+function dwDef(){ return {w:4200,h:2970, img:false, paper:'A3', ori:'L', N:100, pmm:10, ppm:100, src:'grid', pts:[], segs:[], dims:[], polys:[]}; }
 function ptTags(id){ const p=proj(); const ps=(p&&p.dwg&&p.dwg.pts||[]).filter(x=>x.item===id); return ps.map(x=>`<span class="ptag">📍${esc(x.no)}</span>`).join(''); }
 function dwCount(){ const p=proj(); const el=$d('ptCount'); if(el) el.textContent=(p&&p.dwg&&p.dwg.pts.length)||''; }
-async function dwShow(){ const p=proj(); if(!p) return; $d('dwPopName').textContent=document.body.classList.contains('pop')?'· '+p.name:''; if(!p.dwg) p.dwg=dwDef(); const d=p.dwg;
+async function dwShow(){ const p=proj(); if(!p) return; if(p.dwg){ p.dwg.dims=p.dwg.dims||[]; p.dwg.polys=p.dwg.polys||[]; } $d('dwPopName').textContent=document.body.classList.contains('pop')?'· '+p.name:''; if(!p.dwg) p.dwg=dwDef(); const d=p.dwg; d.dims=d.dims||[]; d.polys=d.polys||[];
   if(DW.pid!==p.id){ DW.pid=p.id; DW.d=d; DW.undo=[]; DW.chain=null; DW.cal=null; DW.pdf=null; $d('dwPgW').hidden=true;
     const img=$d('dwImg'); img.removeAttribute('src'); img.hidden=true;
     if(d.img){ $d('dwBusy').hidden=false; const u=await IDB.get(p.id); $d('dwBusy').hidden=true; if(DW.pid!==p.id) return;
@@ -2204,7 +2206,7 @@ async function dwShow(){ const p=proj(); if(!p) return; $d('dwPopName').textCont
 function dwLayout(){ const d=DW.d, st=$d('dwSt'), img=$d('dwImg'), svg=$d('dwSvg');
   st.style.width=d.w+'px'; st.style.height=d.h+'px'; st.classList.toggle('grid',!d.img); img.style.width=d.w+'px'; img.style.height=d.h+'px';
   svg.setAttribute('width',d.w); svg.setAttribute('height',d.h); svg.setAttribute('viewBox',`0 0 ${d.w} ${d.h}`);
-  $d('dwEmpty').hidden=!!d.img; $d('dwPaper').value=d.paper; $d('dwOri').value=d.ori; $d('dwN').value=d.N; dwScTxt(); dwDraw(); }
+  $d('dwEmpty').hidden=!!d.img; $d('dwUp').hidden=!d.img; $d('dwPaper').value=d.paper; $d('dwOri').value=d.ori; $d('dwN').value=d.N; dwScTxt(); dwDraw(); }
 function dwScTxt(){ const d=DW.d; const n=d.pmm?Math.round(d.pmm*1000/d.ppm):null;
   $d('dwScTxt').textContent=`Scale: ${f2(d.ppm)} px/m${n?` · ≈ 1:${n}`:''}${d.src==='pdf'?` · PDF ${Math.round(d.w/d.pmm)}×${Math.round(d.h/d.pmm)} mm`:d.img?` · กระดาษ ${d.paper}`:''}`; }
 function dwApply(){ const v=$d('dwVp'); $d('dwSt').style.transform=`translate(${DW.tx}px,${DW.ty}px) scale(${DW.z})`; $d('dwZt').textContent=Math.round(DW.z*100)+'%'; dwDraw(); }
@@ -2213,21 +2215,39 @@ function dwZoom(k,cx,cy){ const v=$d('dwVp'); if(cx==null){ cx=v.clientWidth/2; 
   DW.tx=cx-(cx-DW.tx)*r; DW.ty=cy-(cy-DW.ty)*r; DW.z=z; dwApply(); }
 function dwW(e){ const r=$d('dwVp').getBoundingClientRect(); return {x:(e.clientX-r.left-DW.tx)/DW.z, y:(e.clientY-r.top-DW.ty)/DW.z, sx:e.clientX-r.left, sy:e.clientY-r.top}; }
 const dwLen=g=>Math.hypot(g.x2-g.x1,g.y2-g.y1)/DW.d.ppm;
-function dwPush(){ DW.undo.push(JSON.stringify({pts:DW.d.pts,segs:DW.d.segs,ppm:DW.d.ppm,N:DW.d.N,pmm:DW.d.pmm})); if(DW.undo.length>60) DW.undo.shift(); }
+function dwPush(){ DW.undo.push(JSON.stringify({pts:DW.d.pts,segs:DW.d.segs,dims:DW.d.dims,polys:DW.d.polys,ppm:DW.d.ppm,N:DW.d.N,pmm:DW.d.pmm})); if(DW.undo.length>60) DW.undo.shift(); }
 function dwCommit(){ save(); dwDraw(); dwLists(); dwCount(); }
 function dwSnap(p,ex){ const r=10/DW.z; let best=null, bd=r; DW.d.segs.forEach((g,i)=>[[g.x1,g.y1],[g.x2,g.y2]].forEach(([x,y])=>{ if(ex&&ex(i)) return; const dd=Math.hypot(x-p.x,y-p.y); if(dd<bd){ bd=dd; best={x,y}; } })); return best||p; }
 function dwOrtho(a,p){ const dx=p.x-a.x, dy=p.y-a.y; return Math.abs(dx)>Math.abs(dy)?{x:p.x,y:a.y}:{x:a.x,y:p.y}; }
 function dwHit(p){ const r=12/DW.z, d=DW.d;
   for(let i=d.pts.length-1;i>=0;i--){ if(Math.hypot(d.pts[i].x-p.x,d.pts[i].y-p.y)<r*1.2) return {k:'pt',i}; }
   for(let i=d.segs.length-1;i>=0;i--){ const g=d.segs[i]; if(Math.hypot(g.x1-p.x,g.y1-p.y)<r) return {k:'e',i,e:1}; if(Math.hypot(g.x2-p.x,g.y2-p.y)<r) return {k:'e',i,e:2}; }
-  for(let i=d.segs.length-1;i>=0;i--){ const g=d.segs[i]; const vx=g.x2-g.x1, vy=g.y2-g.y1, L2=vx*vx+vy*vy||1; let t=((p.x-g.x1)*vx+(p.y-g.y1)*vy)/L2; t=Math.max(0,Math.min(1,t));
-    if(Math.hypot(g.x1+t*vx-p.x,g.y1+t*vy-p.y)<r*0.6) return {k:'s',i}; }
+  for(let i=d.dims.length-1;i>=0;i--){ const g=d.dims[i]; if(Math.hypot(g.x1-p.x,g.y1-p.y)<r) return {k:'de',i,e:1}; if(Math.hypot(g.x2-p.x,g.y2-p.y)<r) return {k:'de',i,e:2}; }
+  if(DW.sel&&DW.sel.k&&(DW.sel.k==='pg'||DW.sel.k==='pv')&&d.polys[DW.sel.i]){ const P=d.polys[DW.sel.i].pts; for(let v=0;v<P.length;v++) if(Math.hypot(P[v][0]-p.x,P[v][1]-p.y)<r) return {k:'pv',i:DW.sel.i,v}; }
+  const nearSeg=(g,f)=>{ const vx=g.x2-g.x1, vy=g.y2-g.y1, L2=vx*vx+vy*vy||1; let t=((p.x-g.x1)*vx+(p.y-g.y1)*vy)/L2; t=Math.max(0,Math.min(1,t)); return Math.hypot(g.x1+t*vx-p.x,g.y1+t*vy-p.y)<r*f; };
+  for(let i=d.segs.length-1;i>=0;i--){ if(nearSeg(d.segs[i],0.6)) return {k:'s',i}; }
+  for(let i=d.dims.length-1;i>=0;i--){ if(nearSeg(d.dims[i],0.6)) return {k:'d',i}; }
+  for(let i=d.polys.length-1;i>=0;i--){ const P=d.polys[i].pts; let ins=false; for(let a=0,b=P.length-1;a<P.length;b=a++){ if(((P[a][1]>p.y)!==(P[b][1]>p.y))&&(p.x<(P[b][0]-P[a][0])*(p.y-P[a][1])/(P[b][1]-P[a][1])+P[a][0])) ins=!ins; } if(ins) return {k:'pg',i}; }
   return null; }
-function dwDraw(){ const d=DW.d; if(!d) return; const z=DW.z, u=1/z, fs=13*u; let o='';
+function polyArea(P){ let a=0; for(let i=0,j=P.length-1;i<P.length;j=i++) a+=(P[j][0]+P[i][0])*(P[j][1]-P[i][1]); return Math.abs(a/2); }
+function dwDraw(){ const d=DW.d; if(!d) return; const z=DW.z, u=1/z, fs=13*u; let o=''; const sel=DW.sel; $d('dwDelSel').disabled=!sel;
+  const halo=(x,y,t,c,extra='')=>`<text x="${x}" y="${y}" ${extra} text-anchor="middle" font-size="${fs}" font-weight="700" fill="${c}" stroke="#fff" stroke-width="${3.5*u}" paint-order="stroke" font-family="Sarabun,sans-serif">${t}</text>`;
+  d.polys.forEach((g,i)=>{ const hl=sel&&(sel.k==='pg'||sel.k==='pv')&&sel.i===i, pts=g.pts.map(q=>q.join(',')).join(' ');
+    o+=`<polygon points="${pts}" fill="${g.c}" fill-opacity="${hl?0.45:0.32}" stroke="${g.c}" stroke-width="${2*u}" stroke-linejoin="round"${hl?` stroke-dasharray="${6*u} ${3*u}"`:''}/>`;
+    if(hl){ g.pts.forEach(q=>o+=`<rect x="${q[0]-4*u}" y="${q[1]-4*u}" width="${8*u}" height="${8*u}" fill="#fff" stroke="#212529" stroke-width="${1.2*u}"/>`); const cx=g.pts.reduce((a,q)=>a+q[0],0)/g.pts.length, cy=g.pts.reduce((a,q)=>a+q[1],0)/g.pts.length; o+=halo(cx,cy,`${f2(polyArea(g.pts)/d.ppm/d.ppm)} m²`,'#212529'); } });
+  if(DW.poly&&DW.poly.length){ const P=[...DW.poly,...(DW.hover?[[DW.hover.x,DW.hover.y]]:[])]; o+=`<polyline points="${P.map(q=>q.join(',')).join(' ')}" fill="${DW.col}" fill-opacity=".25" stroke="${DW.col}" stroke-width="${2*u}" stroke-dasharray="${5*u} ${3*u}"/>`;
+    o+=`<circle cx="${DW.poly[0][0]}" cy="${DW.poly[0][1]}" r="${6*u}" fill="#fff" stroke="${DW.col}" stroke-width="${2*u}"/>`; DW.poly.slice(1).forEach(q=>o+=`<circle cx="${q[0]}" cy="${q[1]}" r="${3*u}" fill="${DW.col}"/>`); }
   d.segs.forEach((g,i)=>{ const L=dwLen(g), mx=(g.x1+g.x2)/2, my=(g.y1+g.y2)/2; let a=Math.atan2(g.y2-g.y1,g.x2-g.x1)*180/Math.PI; if(a>90) a-=180; if(a<-90) a+=180; const hl=DW.sel&&DW.sel.k==='s'&&DW.sel.i===i;
     o+=`<line x1="${g.x1}" y1="${g.y1}" x2="${g.x2}" y2="${g.y2}" stroke="${hl?'#f08c00':'#e03131'}" stroke-width="${3*u}" stroke-linecap="round"/>`
      +`<circle cx="${g.x1}" cy="${g.y1}" r="${4*u}" fill="#fff" stroke="#e03131" stroke-width="${1.5*u}"/><circle cx="${g.x2}" cy="${g.y2}" r="${4*u}" fill="#fff" stroke="#e03131" stroke-width="${1.5*u}"/>`
      +`<text transform="translate(${mx},${my}) rotate(${a})" y="${-6*u}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="#c92a2a" stroke="#fff" stroke-width="${3.5*u}" paint-order="stroke" font-family="Sarabun,sans-serif">S${i+1} · ${f2(L)} m</text>`; });
+  const dimSvg=(g,c,hl)=>{ const L=Math.hypot(g.x2-g.x1,g.y2-g.y1), nx=-(g.y2-g.y1)/(L||1), ny=(g.x2-g.x1)/(L||1), t=6*u, mx=(g.x1+g.x2)/2, my=(g.y1+g.y2)/2; let a=Math.atan2(g.y2-g.y1,g.x2-g.x1)*180/Math.PI; if(a>90) a-=180; if(a<-90) a+=180;
+    const ux=(g.x2-g.x1)/(L||1), uy=(g.y2-g.y1)/(L||1), ah=9*u, aw=3.5*u, arr=(x,y,sx)=>`<path d="M${x} ${y} L${x+sx*(ux*ah)+nx*aw} ${y+sx*(uy*ah)+ny*aw} L${x+sx*(ux*ah)-nx*aw} ${y+sx*(uy*ah)-ny*aw} Z" fill="${c}"/>`;
+    return `<line x1="${g.x1}" y1="${g.y1}" x2="${g.x2}" y2="${g.y2}" stroke="${c}" stroke-width="${(hl?2.4:1.6)*u}"/>`+arr(g.x1,g.y1,1)+arr(g.x2,g.y2,-1)
+     +`<line x1="${g.x1+nx*t}" y1="${g.y1+ny*t}" x2="${g.x1-nx*t}" y2="${g.y1-ny*t}" stroke="${c}" stroke-width="${1.4*u}"/><line x1="${g.x2+nx*t}" y1="${g.y2+ny*t}" x2="${g.x2-nx*t}" y2="${g.y2-ny*t}" stroke="${c}" stroke-width="${1.4*u}"/>`
+     +halo(0,-6*u,`${f2(L/d.ppm)} m`,c,`transform="translate(${mx},${my}) rotate(${a})"`); };
+  d.dims.forEach((g,i)=>{ o+=dimSvg(g, sel&&(sel.k==='d'||sel.k==='de')&&sel.i===i?'#f08c00':'#1864ab', sel&&sel.i===i&&(sel.k==='d'||sel.k==='de')); });
+  if(DW.dimA&&DW.hover) o+=dimSvg({x1:DW.dimA.x,y1:DW.dimA.y,x2:DW.hover.x,y2:DW.hover.y},'#1c7ed6',false);
   if(DW.chain&&DW.hover){ const a=DW.chain, b=DW.hover; o+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#e03131" stroke-width="${2*u}" stroke-dasharray="${6*u} ${4*u}"/><text x="${b.x+8*u}" y="${b.y-8*u}" font-size="${fs}" font-weight="700" fill="#c92a2a" stroke="#fff" stroke-width="${3.5*u}" paint-order="stroke">${f2(Math.hypot(b.x-a.x,b.y-a.y)/d.ppm)} m</text>`; }
   if(DW.cal){ const a=DW.cal, b=DW.cal.b||DW.hover; if(b) o+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#7048e8" stroke-width="${2*u}" stroke-dasharray="${5*u} ${3*u}"/>`;
     o+=`<circle cx="${a.x}" cy="${a.y}" r="${4*u}" fill="#7048e8"/>`; if(DW.cal.b) o+=`<circle cx="${b.x}" cy="${b.y}" r="${4*u}" fill="#7048e8"/>`; }
@@ -2237,8 +2257,9 @@ function dwDraw(){ const d=DW.d; if(!d) return; const z=DW.z, u=1/z, fs=13*u; le
   $d('dwSvg').innerHTML=o; }
 function dwHint(){ $d('dwHint').textContent={sel:'ลากจุด/ปลายเส้นเพื่อย้าย · ลากพื้นที่ว่างเพื่อเลื่อนแบบ · ล้อเมาส์ = ซูม · กด Delete เพื่อลบที่เลือก',
   pt:'คลิกบนแบบเพื่อวาง Point No. (เลขรันอัตโนมัติ แก้ชื่อได้ในตารางด้านล่าง)', seg:'คลิกจุดเริ่ม แล้วคลิกต่อเนื่องเพื่อวาดเส้น · Shift = ล็อกแนวตั้ง/นอน · ดับเบิลคลิก/Esc/คลิกขวา = จบเส้น',
+  dim:'คลิกจุดเริ่ม–จุดปลายเพื่อวัดระยะ (ค้างไว้บนแบบ) · Shift = ล็อกแนวตั้ง/นอน · เลือกแล้วกด Delete เพื่อลบ', poly:'คลิกทีละมุมเพื่อวาดพื้นที่ไฮไลต์ · คลิกจุดแรก / ดับเบิลคลิก / Enter = ปิดรูป · Esc = ยกเลิก · เลือกสีได้ที่แถบสี',
   cal:'คลิก 2 จุดบนระยะที่ทราบความยาวจริง (เช่น เส้นกริด/ระยะในแบบ) แล้วกรอกความยาว'}[DW.tool]; }
-function dwTool(t){ DW.tool=t; DW.chain=null; DW.cal=null; document.querySelectorAll('[data-dt]').forEach(b=>b.classList.toggle('on',b.dataset.dt===t)); $d('dwVp').classList.toggle('tool',t!=='sel'); dwHint(); dwDraw(); }
+function dwTool(t){ DW.tool=t; DW.chain=null; DW.cal=null; DW.dimA=null; DW.poly=null; document.querySelectorAll('[data-dt]').forEach(b=>b.classList.toggle('on',b.dataset.dt===t)); $d('dwVp').classList.toggle('tool',t!=='sel'); dwHint(); dwDraw(); }
 function askNum(title,label,val,cb){ const m=$d('nModal'); $d('nTitle').textContent=title; $d('nLab').textContent=label; const i=$d('nVal'); i.value=val??''; m.classList.add('on'); setTimeout(()=>{ i.focus(); i.select(); },50);
   $d('nNo').onclick=()=>{ m.classList.remove('on'); cb(null); }; $d('nForm').onsubmit=e=>{ e.preventDefault(); const v=parseFloat(i.value); if(!(v>0)) return i.focus(); m.classList.remove('on'); cb(v); }; }
 function dwLists(){ const d=DW.d; if(!d) return;
@@ -2254,8 +2275,8 @@ function dwNextNo(){ let m=0; DW.d.pts.forEach(p=>{ const n=parseInt(String(p.no
 /* pointer events */
 (function(){ const v=$d('dwVp');
   v.addEventListener('wheel',e=>{ e.preventDefault(); const w=dwW(e); dwZoom(e.deltaY<0?1.15:1/1.15,w.sx,w.sy); },{passive:false});
-  v.addEventListener('contextmenu',e=>{ e.preventDefault(); if(DW.chain){ DW.chain=null; dwDraw(); } });
-  v.addEventListener('dblclick',e=>{ if(DW.tool==='seg'){ DW.chain=null; dwDraw(); } });
+  v.addEventListener('contextmenu',e=>{ e.preventDefault(); if(DW.chain){ DW.chain=null; dwDraw(); } if(DW.poly) dwPolyEnd(); });
+  v.addEventListener('dblclick',e=>{ if(DW.tool==='seg'){ DW.chain=null; dwDraw(); } if(DW.tool==='poly'&&DW.poly) dwPolyEnd(); });
   v.addEventListener('pointerdown',e=>{ if(!DW.d) return; v.setPointerCapture(e.pointerId); DW.ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(DW.ptrs.size===2){ const [a,b]=[...DW.ptrs.values()]; DW.drag={k:'pinch', d0:Math.hypot(a.x-b.x,a.y-b.y), z0:DW.z, tx0:DW.tx, ty0:DW.ty, cx:(a.x+b.x)/2, cy:(a.y+b.y)/2}; return; }
     const w=dwW(e); if(e.button===2) return;
@@ -2272,16 +2293,24 @@ function dwNextNo(){ let m=0; DW.d.pts.forEach(p=>{ const n=parseInt(String(p.no
     const d=DW.d; if(!d) return;
     if(g&&g.k==='pt'){ d.pts[g.i].x=w.x; d.pts[g.i].y=w.y; g.moved=true; dwDraw(); return; }
     if(g&&g.k==='e'){ const p=dwSnap(w,i=>i===g.i); g.pairs.forEach(([i,en])=>{ const s=d.segs[i]; s['x'+en]=p.x; s['y'+en]=p.y; }); g.moved=true; dwDraw(); return; }
+    if(g&&g.k==='de'){ let p=w; if(e.shiftKey){ const o2=d.dims[g.i]; p=dwOrtho({x:o2['x'+(3-g.e)],y:o2['y'+(3-g.e)]},w); } d.dims[g.i]['x'+g.e]=p.x; d.dims[g.i]['y'+g.e]=p.y; g.moved=true; dwDraw(); return; }
+    if(g&&g.k==='d'){ const dx=w.x-g.x, dy=w.y-g.y, s=d.dims[g.i]; s.x1+=dx; s.y1+=dy; s.x2+=dx; s.y2+=dy; g.x=w.x; g.y=w.y; g.moved=true; dwDraw(); return; }
+    if(g&&g.k==='pv'){ d.polys[g.i].pts[g.v]=[w.x,w.y]; g.moved=true; dwDraw(); return; }
+    if(g&&g.k==='pg'){ const dx=w.x-g.x, dy=w.y-g.y; d.polys[g.i].pts.forEach(q=>{ q[0]+=dx; q[1]+=dy; }); g.x=w.x; g.y=w.y; g.moved=true; dwDraw(); return; }
     if(g&&g.k==='s'){ const dx=w.x-g.x, dy=w.y-g.y; const s=d.segs[g.i]; s.x1+=dx; s.y1+=dy; s.x2+=dx; s.y2+=dy; g.x=w.x; g.y=w.y; g.moved=true; dwDraw(); return; }
     if(DW.tool==='seg'&&DW.chain){ let p=dwSnap(w); if(e.shiftKey) p=dwOrtho(DW.chain,p); DW.hover=p; dwDraw(); }
+    else if(DW.tool==='dim'&&DW.dimA){ DW.hover=e.shiftKey?dwOrtho(DW.dimA,w):w; dwDraw(); }
+    else if(DW.tool==='poly'&&DW.poly){ DW.hover=w; dwDraw(); }
     else if(DW.tool==='cal'&&DW.cal&&!DW.cal.b){ DW.hover=e.shiftKey?dwOrtho(DW.cal,w):w; dwDraw(); }
   });
   const up=e=>{ DW.ptrs.delete(e.pointerId); const g=DW.drag; v.classList.remove('pan');
     if(!g){ return; } if(g.k==='pinch'){ if(DW.ptrs.size===0) DW.drag=null; return; } DW.drag=null;
-    if(['pt','e','s'].includes(g.k)){ if(g.moved) dwCommit(); else DW.undo.pop(); return; }
+    if(['pt','e','s','de','d','pv','pg'].includes(g.k)){ if(g.moved) dwCommit(); else DW.undo.pop(); return; }
     if(g.k!=='tap') return; const w=dwW(e), d=DW.d;
     if(DW.tool==='pt'){ dwPush(); d.pts.push({no:dwNextNo(),x:w.x,y:w.y,note:'',item:null}); DW.sel={k:'pt',i:d.pts.length-1}; dwCommit(); return; }
     if(DW.tool==='seg'){ let p=dwSnap(w); if(DW.chain){ if(e.shiftKey) p=dwOrtho(DW.chain,p); if(Math.hypot(p.x-DW.chain.x,p.y-DW.chain.y)<2/DW.z) return; dwPush(); d.segs.push({x1:DW.chain.x,y1:DW.chain.y,x2:p.x,y2:p.y}); DW.chain=p; dwCommit(); } else { DW.chain=p; DW.hover=p; dwDraw(); } return; }
+    if(DW.tool==='dim'){ if(!DW.dimA){ DW.dimA={x:w.x,y:w.y}; DW.hover=w; dwDraw(); return; } const b=e.shiftKey?dwOrtho(DW.dimA,w):w; if(Math.hypot(b.x-DW.dimA.x,b.y-DW.dimA.y)<3/DW.z) return; dwPush(); d.dims.push({x1:DW.dimA.x,y1:DW.dimA.y,x2:b.x,y2:b.y}); DW.dimA=null; DW.hover=null; dwCommit(); toast(`ระยะ ${f2(Math.hypot(b.x-d.dims.at(-1).x1,b.y-d.dims.at(-1).y1)/d.ppm)} m`); return; }
+    if(DW.tool==='poly'){ if(!DW.poly) DW.poly=[]; const P=DW.poly; if(P.length>=3&&Math.hypot(P[0][0]-w.x,P[0][1]-w.y)<10/DW.z){ dwPolyEnd(); return; } const L=P[P.length-1]; if(!L||Math.hypot(L[0]-w.x,L[1]-w.y)>3/DW.z) P.push([w.x,w.y]); dwDraw(); return; }
     if(DW.tool==='cal'){ if(!DW.cal){ DW.cal={x:w.x,y:w.y}; dwDraw(); return; } const b=e.shiftKey?dwOrtho(DW.cal,w):w; DW.cal.b=b; dwDraw(); const px=Math.hypot(b.x-DW.cal.x,b.y-DW.cal.y);
       askNum('Calibrate Scale','ความยาวจริงของระยะที่เลือก (m)', '', val=>{ if(val&&px>0){ dwPush(); d.ppm=px/val; if(d.pmm) d.N=Math.round(d.pmm*1000/d.ppm); dwLayout(); dwLists(); save(); toast(`ตั้งสเกลแล้ว ${f2(d.ppm)} px/m`); } DW.cal=null; dwDraw(); }); }
   };
@@ -2290,13 +2319,20 @@ function dwNextNo(){ let m=0; DW.d.pts.forEach(p=>{ const n=parseInt(String(p.no
 function dwPairs(h){ const d=DW.d, g=d.segs[h.i], x=g['x'+h.e], y=g['y'+h.e], r=0.5; const out=[];
   d.segs.forEach((s,i)=>[1,2].forEach(en=>{ if(Math.abs(s['x'+en]-x)<r&&Math.abs(s['y'+en]-y)<r) out.push([i,en]); })); return out; }
 document.addEventListener('keydown',e=>{ if(view!=='drawing'||!DW.d) return; if(e.target.closest('input,select,textarea')) return;
-  if(e.key==='Escape'){ DW.chain=null; DW.cal=null; dwDraw(); }
-  if((e.key==='Delete'||e.key==='Backspace')&&DW.sel){ dwPush(); if(DW.sel.k==='pt') DW.d.pts.splice(DW.sel.i,1); else DW.d.segs.splice(DW.sel.i,1); DW.sel=null; dwCommit(); renderList(); }
+  if(e.key==='Escape'){ DW.chain=null; DW.cal=null; DW.dimA=null; DW.poly=null; dwDraw(); }
+  if(e.key==='Enter'&&DW.poly){ dwPolyEnd(); }
+  if((e.key==='Delete'||e.key==='Backspace')&&DW.sel){ dwDelSel(); }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){ e.preventDefault(); dwUndo(); } });
+function dwDelSel(){ const s=DW.sel; if(!s) return; dwPush(); const k=s.k; if(k==='pt') DW.d.pts.splice(s.i,1); else if(k==='s'||k==='e') DW.d.segs.splice(s.i,1); else if(k==='d'||k==='de') DW.d.dims.splice(s.i,1); else if(k==='pg'||k==='pv') DW.d.polys.splice(s.i,1); DW.sel=null; dwCommit(); renderList(); }
+function dwPolyEnd(){ const P=(DW.poly||[]).filter((q,i,a)=>i===0||Math.hypot(q[0]-a[i-1][0],q[1]-a[i-1][1])>2/DW.z); DW.poly=null; DW.hover=null; if(P.length<3){ dwDraw(); return; } dwPush(); DW.d.polys.push({pts:P,c:DW.col}); DW.sel=null; dwCommit(); }
+DW.col='#ffd43b'; const DWCOLS=['#ffd43b','#ff922b','#ff6b6b','#51cf66','#339af0','#cc5de8'];
+$d('dwCol').innerHTML=DWCOLS.map(c=>`<i data-c="${c}" style="background:${c}" class="${c===DW.col?'on':''}" title="สีไฮไลต์"></i>`).join('');
+$d('dwCol').onclick=e=>{ const i=e.target.closest('[data-c]'); if(!i) return; DW.col=i.dataset.c; $d('dwCol').querySelectorAll('i').forEach(x=>x.classList.toggle('on',x===i)); const s=DW.sel; if(s&&(s.k==='pg'||s.k==='pv')){ dwPush(); DW.d.polys[s.i].c=DW.col; dwCommit(); } else if(DW.tool!=='poly') dwTool('poly'); };
+$d('dwDelSel').onclick=dwDelSel;
 function dwUndo(){ const s=DW.undo.pop(); if(!s) return toast('ไม่มีขั้นตอนให้ย้อน'); Object.assign(DW.d,JSON.parse(s)); DW.sel=null; dwScTxt(); dwCommit(); renderList(); }
 document.getElementById('dwTools').addEventListener('click',e=>{ const b=e.target.closest('[data-dt]'); if(b) dwTool(b.dataset.dt); });
 $d('dwZi').onclick=()=>dwZoom(1.25); $d('dwZo').onclick=()=>dwZoom(1/1.25); $d('dwFit').onclick=dwFit; $d('dwUndo').onclick=dwUndo;
-$d('dwClr').onclick=()=>{ if(!DW.d) return; ask('ลบ Point และ Segment ทั้งหมด?','แบบพื้นหลังและสเกลยังอยู่ (กด Undo เพื่อย้อนได้)',()=>{ dwPush(); DW.d.pts=[]; DW.d.segs=[]; DW.sel=null; dwCommit(); renderList(); }); };
+$d('dwClr').onclick=()=>{ if(!DW.d) return; ask('ลบ Point, Segment, ระยะ และ Highlight ทั้งหมด?','แบบพื้นหลังและสเกลยังอยู่ (กด Undo เพื่อย้อนได้)',()=>{ dwPush(); DW.d.pts=[]; DW.d.segs=[]; DW.d.dims=[]; DW.d.polys=[]; DW.sel=null; dwCommit(); renderList(); }); };
 $d('dwBg').onclick=()=>{ const p=proj(); if(!p||!DW.d.img) return toast('ยังไม่มีแบบพื้นหลัง'); ask('ลบแบบพื้นหลัง?','Point และ Segment ยังอยู่ — สเกลจะคงค่าเดิม',()=>{ IDB.del(p.id); DW.d.img=false; DW.d.src='grid'; DW.pdf=null; $d('dwPgW').hidden=true; const im=$d('dwImg'); im.removeAttribute('src'); im.hidden=true; save(); dwLayout(); }); };
 $d('dwApply').onclick=()=>{ const d=DW.d; if(!d) return; const N=+$d('dwN').value; if(!(N>0)) return toast('กรอกมาตราส่วน');
   d.paper=$d('dwPaper').value; d.ori=$d('dwOri').value; d.N=N;
@@ -2324,13 +2360,16 @@ async function dwRenderPdfPage(n){ const pg=await DW.pdf.getPage(n); const vp1=p
   return {url:c.toDataURL('image/jpeg',0.85), w:c.width, h:c.height, pmm:c.width/wmm, wmm, hmm}; }
 function paperOf(wmm,hmm){ const L=Math.max(wmm,hmm); let best='A3', bd=1e9; for(const k in PAPER){ const dd=Math.abs(PAPER[k][0]-L); if(dd<bd){ bd=dd; best=k; } } return {paper:best, ori:wmm>=hmm?'L':'P'}; }
 async function dwSetImage(r, src){ const p=proj(), d=DW.d; const keep=d.pts.length||d.segs.length; const sx=keep?r.w/d.w:1, sy=keep?r.h/d.h:1;
-  d.pts.forEach(q=>{ q.x*=sx; q.y*=sy; }); d.segs.forEach(g=>{ g.x1*=sx; g.x2*=sx; g.y1*=sy; g.y2*=sy; });
+  d.pts.forEach(q=>{ q.x*=sx; q.y*=sy; }); (d.dims||[]).forEach(g=>{ g.x1*=sx; g.x2*=sx; g.y1*=sy; g.y2*=sy; }); (d.polys||[]).forEach(g=>g.pts.forEach(q=>{ q[0]*=sx; q[1]*=sy; })); d.segs.forEach(g=>{ g.x1*=sx; g.x2*=sx; g.y1*=sy; g.y2*=sy; });
   d.w=r.w; d.h=r.h; d.img=true; d.src=src;
   if(src==='pdf'){ d.pmm=r.pmm; const q=paperOf(r.wmm,r.hmm); d.paper=q.paper; d.ori=q.ori; }
   else { const q=d.w>=d.h?'L':'P'; d.ori=q; const P=PAPER[d.paper]; d.pmm=d.w/(q==='L'?P[0]:P[1]); }
   d.ppm=d.pmm*1000/d.N; await IDB.put(p.id,r.url); const im=$d('dwImg'); im.src=r.url; im.hidden=false; save(); dwLayout(); dwFit(); dwLists(); }
-$d('dwUp').onclick=()=>{ if(!proj()) return; const inp=document.createElement('input'); inp.type='file'; inp.accept='.pdf,application/pdf,image/png,image/jpeg';
-  inp.onchange=async()=>{ const f=inp.files[0]; if(!f) return; $d('dwBusy').hidden=false;
+function dwPick(){ if(!proj()) return; const inp=document.createElement('input'); inp.type='file'; inp.accept='.pdf,application/pdf,image/png,image/jpeg'; inp.onchange=()=>{ if(inp.files[0]) dwLoadFile(inp.files[0]); }; inp.click(); }
+$d('dwUp').onclick=dwPick; $d('dwUp2').onclick=dwPick; $d('dwEmpty').addEventListener('pointerdown',e=>{ if(e.target.closest('.dw-ec')) e.stopPropagation(); });
+(()=>{ const v=$d('dwVp'); ['dragenter','dragover'].forEach(t=>v.addEventListener(t,e=>{ e.preventDefault(); v.classList.add('drop'); })); ['dragleave','drop'].forEach(t=>v.addEventListener(t,e=>{ e.preventDefault(); v.classList.remove('drop'); }));
+  v.addEventListener('drop',e=>{ const f=e.dataTransfer&&e.dataTransfer.files[0]; if(f) dwLoadFile(f); }); })();
+async function dwLoadFile(f){ { $d('dwBusy').hidden=false;
     try{ if(/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name)){ const lib=await pdfLib(); const buf=new Uint8Array(await f.arrayBuffer()); DW.pdf=await lib.getDocument({data:buf}).promise;
         const n=DW.pdf.numPages; $d('dwPg').innerHTML=Array.from({length:n},(_,i)=>`<option value="${i+1}">${i+1} / ${n}</option>`).join(''); $d('dwPgW').hidden=n<2;
         const r=await dwRenderPdfPage(1); await dwSetImage(r,'pdf'); toast(`นำเข้า PDF แล้ว — ${DW.d.paper} · สเกล 1:${DW.d.N} (แก้ได้แล้วกด “ใช้สเกลกระดาษ”)`); }
@@ -2339,8 +2378,7 @@ $d('dwUp').onclick=()=>{ if(!proj()) return; const inp=document.createElement('i
         let w=im.naturalWidth, h=im.naturalHeight, u=url; const M=6000; if(Math.max(w,h)>M){ const k=M/Math.max(w,h); w=Math.round(w*k); h=Math.round(h*k); const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(im,0,0,w,h); u=c.toDataURL('image/jpeg',0.88); }
         await dwSetImage({url:u,w,h},'img'); toast(`นำเข้ารูปแล้ว — เลือกกระดาษ/มาตราส่วนแล้วกด “ใช้สเกลกระดาษ” หรือใช้ Calibrate`); } }
     catch(err){ console.error(err); toast('เปิดไฟล์ไม่ได้'+(/load/.test(err&&err.message)?' (โหลดตัวอ่าน PDF ไม่ได้ — ต้องต่ออินเทอร์เน็ต)':'')); }
-    $d('dwBusy').hidden=true; };
-  inp.click(); };
+    $d('dwBusy').hidden=true; } }
 $d('dwPg').onchange=async()=>{ if(!DW.pdf) return; $d('dwBusy').hidden=false; try{ await dwSetImage(await dwRenderPdfPage(+$d('dwPg').value),'pdf'); }catch(e){ toast('เปิดหน้าไม่ได้'); } $d('dwBusy').hidden=true; };
 window.addEventListener('resize',()=>{ if(view==='drawing') dwApply(); });
 $d('dwPop').onclick=()=>{ save(); let w=null; try{ w=window.open(location.href.split('#')[0]+'#drawing-pop','ductboq_dw','popup=yes,width=1400,height=900'); }catch(e){}
